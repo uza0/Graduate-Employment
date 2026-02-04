@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jobs - JoinWork</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <style>
+        .jobs-header {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            color: var(--color-text-inverse);
+            padding: var(--spacing-2xl) 0;
+            margin-bottom: var(--spacing-2xl);
+            transition: background var(--transition-base);
+        }
+        .filters-section {
+            background: var(--color-surface);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            margin-bottom: var(--spacing-xl);
+            transition: background-color var(--transition-base);
+        }
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+        }
+        .job-card {
+            margin-bottom: var(--spacing-lg);
+            transition: transform var(--transition-base);
+        }
+        .job-card:hover {
+            transform: translateY(-4px);
+        }
+        .job-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-md);
+        }
+        .search-box {
+            margin-bottom: var(--spacing-lg);
+        }
+        .search-input {
+            width: 100%;
+            padding: var(--spacing-md);
+            font-size: var(--font-size-lg);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-md);
+            background-color: var(--color-surface);
+            color: var(--color-text-primary);
+            transition: border-color var(--transition-base), background-color var(--transition-base), color var(--transition-base);
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+        .dark-mode .search-input:focus {
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <!-- Dark Mode Toggle Button -->
+    <button id="dark-mode-toggle" class="btn btn-outline btn-sm" onclick="toggleDarkMode()" title="Toggle Dark Mode تبديل الوضع الداكن" style="position: fixed; top: 20px; right: 20px; z-index: 1000; background: var(--color-surface); border: 2px solid var(--color-primary);">
+        <span id="dark-mode-icon">🌙</span>
+    </button>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <a href="dashboard.html" class="header-logo">JoinWork</a>
+            <nav class="header-nav">
+                <a href="jobs.html">Jobs الوظائف</a>
+                <a href="workshops.html">Workshops ورش العمل</a>
+                <a href="profile.html">Profile الملف الشخصي</a>
+            </nav>
+            <div class="header-user">
+                <span id="user-name"></span>
+                <button class="btn btn-outline btn-sm" onclick="authAPI.logout()">Logout تسجيل الخروج</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Jobs Header -->
+    <div class="jobs-header">
+        <div class="container">
+            <h1>Job Opportunities فرص العمل</h1>
+            <p>Find your next career opportunity<br>ابحث عن فرصتك المهنية القادمة</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container page-container">
+        <!-- Search Box -->
+        <div class="search-box">
+            <input 
+                type="text" 
+                id="search-input" 
+                class="search-input" 
+                placeholder="Search jobs by title, company, or skills... ابحث عن الوظائف بالعنوان أو الشركة أو المهارات..."
+                onkeyup="filterJobs()"
+            >
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-section">
+            <h3 style="margin-bottom: var(--spacing-md);">Filters المرشحات</h3>
+            <div class="filters-grid">
+                <div class="form-group">
+                    <label for="filter-location" class="form-label">Location الموقع</label>
+                    <select id="filter-location" class="form-select" onchange="filterJobs()">
+                        <option value="">All Locations جميع المواقع</option>
+                        <option value="Baghdad">Baghdad بغداد</option>
+                        <option value="Basra">Basra البصرة</option>
+                        <option value="Erbil">Erbil أربيل</option>
+                        <option value="Mosul">Mosul الموصل</option>
+                        <option value="Remote">Remote عن بُعد</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="filter-type" class="form-label">Employment Type نوع التوظيف</label>
+                    <select id="filter-type" class="form-select" onchange="filterJobs()">
+                        <option value="">All Types جميع الأنواع</option>
+                        <option value="full-time">Full Time دوام كامل</option>
+                        <option value="part-time">Part Time دوام جزئي</option>
+                        <option value="contract">Contract عقد</option>
+                        <option value="internship">Internship تدريب</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="filter-skills" class="form-label">Skills المهارات</label>
+                    <input 
+                        type="text" 
+                        id="filter-skills" 
+                        class="form-input" 
+                        placeholder="JavaScript, Python..."
+                        onkeyup="filterJobs()"
+                    >
+                </div>
+            </div>
+        </div>
+
+        <!-- Jobs List -->
+        <div id="jobs-container">
+            <div class="empty-state">
+                <p>Loading jobs... جاري تحميل الوظائف...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>JoinWork</h4>
+                    <p>Connecting graduates with opportunities<br>ربط الخريجين بالفرص</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links الروابط السريعة</h4>
+                    <a href="jobs.html">Jobs الوظائف</a>
+                    <a href="workshops.html">Workshops ورش العمل</a>
+                    <a href="profile.html">Profile الملف الشخصي</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 JoinWork. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        let allJobs = [];
+        let filteredJobs = [];
+
+        // Check authentication
+        if (!isAuthenticated()) {
+            window.location.href = 'login.html';
+        }
+
+        // Load user data
+        const userData = getCurrentUser();
+        if (userData) {
+            document.getElementById('user-name').textContent = userData.full_name || userData.email;
+        }
+
+        // Load jobs
+        async function loadJobs() {
+            try {
+                const response = await jobsAPI.getAll();
+                allJobs = response.jobs || [];
+                filteredJobs = [...allJobs];
+                displayJobs();
+            } catch (error) {
+                console.error('Error loading jobs:', error);
+                document.getElementById('jobs-container').innerHTML = `
+                    <div class="alert alert-error">
+                        <strong>Error:</strong> Failed to load jobs. Please try again later.
+                    </div>
+                `;
+            }
+        }
+
+        // Filter jobs
+        function filterJobs() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const locationFilter = document.getElementById('filter-location').value.toLowerCase();
+            const typeFilter = document.getElementById('filter-type').value.toLowerCase();
+            const skillsFilter = document.getElementById('filter-skills').value.toLowerCase();
+
+            filteredJobs = allJobs.filter(job => {
+                const matchesSearch = !searchTerm || 
+                    (job.title && job.title.toLowerCase().includes(searchTerm)) ||
+                    (job.company_name && job.company_name.toLowerCase().includes(searchTerm)) ||
+                    (job.skills_required && job.skills_required.toLowerCase().includes(searchTerm));
+
+                const matchesLocation = !locationFilter || 
+                    (job.location && job.location.toLowerCase().includes(locationFilter));
+
+                const matchesType = !typeFilter || 
+                    (job.employment_type && job.employment_type.toLowerCase() === typeFilter);
+
+                const matchesSkills = !skillsFilter || 
+                    (job.skills_required && job.skills_required.toLowerCase().includes(skillsFilter));
+
+                return matchesSearch && matchesLocation && matchesType && matchesSkills;
+            });
+
+            displayJobs();
+        }
+
+        // Display jobs
+        function displayJobs() {
+            const container = document.getElementById('jobs-container');
+
+            if (filteredJobs.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>No jobs found matching your criteria.<br>لم يتم العثور على وظائف تطابق معاييرك.</p>
+                        <button class="btn btn-primary" onclick="clearFilters()">Clear Filters مسح المرشحات</button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filteredJobs.map(job => `
+                <div class="card job-card">
+                    <div class="job-title">${job.title || 'Job Title'}</div>
+                    <div class="job-company">${job.company_name || 'Company'}</div>
+                    <div class="job-location">📍 ${job.location || 'Location not specified'}</div>
+                    ${job.salary ? `<div class="job-salary">💰 ${formatCurrency(job.salary)}</div>` : ''}
+                    ${job.employment_type ? `<div style="margin-top: var(--spacing-xs);">
+                        <span class="skill-tag">${job.employment_type}</span>
+                    </div>` : ''}
+                    ${job.skills_required ? `
+                        <div class="job-skills" style="margin-top: var(--spacing-md);">
+                            <strong>Required Skills: المهارات المطلوبة:</strong>
+                            ${parseSkills(job.skills_required).map(skill => 
+                                `<span class="skill-tag">${skill}</span>`
+                            ).join('')}
+                        </div>
+                    ` : ''}
+                    ${job.description ? `
+                        <div style="margin-top: var(--spacing-md); color: var(--color-text-medium);">
+                            ${truncateText(job.description, 150)}
+                        </div>
+                    ` : ''}
+                    <div class="job-actions">
+                        <button class="btn btn-primary" onclick="applyForJob(${job.job_id})">Apply Now تقديم الآن</button>
+                        <button class="btn btn-outline" onclick="saveJob(${job.job_id})">Save Job حفظ الوظيفة</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Apply for job
+        async function applyForJob(jobId) {
+            if (!confirm('Are you sure you want to apply for this job?\nهل أنت متأكد من التقديم لهذه الوظيفة؟')) {
+                return;
+            }
+
+            try {
+                await jobsAPI.apply(jobId);
+                alert('Application submitted successfully!\nتم إرسال الطلب بنجاح!');
+            } catch (error) {
+                alert('Failed to apply: ' + (error.message || 'Unknown error') + '\nفشل التقديم: ' + (error.message || 'خطأ غير معروف'));
+            }
+        }
+
+        // Save job
+        async function saveJob(jobId) {
+            try {
+                await jobsAPI.saveJob(jobId);
+                alert('Job saved successfully!\nتم حفظ الوظيفة بنجاح!');
+            } catch (error) {
+                alert('Failed to save job: ' + (error.message || 'Unknown error') + '\nفشل حفظ الوظيفة: ' + (error.message || 'خطأ غير معروف'));
+            }
+        }
+
+        // Clear filters
+        function clearFilters() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('filter-location').value = '';
+            document.getElementById('filter-type').value = '';
+            document.getElementById('filter-skills').value = '';
+            filterJobs();
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initDarkMode();
+            loadJobs();
+        });
+    </script>
+</body>
+</html>
+

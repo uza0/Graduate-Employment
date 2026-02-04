@@ -1,0 +1,266 @@
+/**
+ * JoinWork - Unified Design System & Theme
+ * Light Mode (default) and Dark Mode with CSS Variables
+ */
+
+:root {
+  /* ============================================
+     LIGHT MODE COLORS (Default)
+     ============================================ */
+  
+  /* Primary Colors - Brand Blue */
+  --color-primary: rgb(30, 58, 138);
+  --color-primary-dark: rgb(24, 46, 110);
+  --color-primary-light: rgb(37, 72, 173);
+  --color-primary-hover: rgb(25, 50, 120);
+  
+  /* Secondary Colors - Accent Blue */
+  --color-secondary: rgb(59, 130, 246);
+  --color-secondary-dark: rgb(37, 99, 235);
+  --color-secondary-light: rgb(96, 165, 250);
+  --color-secondary-hover: rgb(47, 120, 240);
+  
+  /* Accent Color - Orange */
+  --color-accent: rgb(249, 115, 22);
+  --color-accent-dark: rgb(234, 88, 12);
+  --color-accent-light: rgb(251, 146, 60);
+  --color-accent-hover: rgb(245, 101, 15);
+  
+  /* Background Colors */
+  --color-bg-primary: rgb(249, 250, 251);
+  --color-bg-secondary: rgb(255, 255, 255);
+  --color-bg-tertiary: rgb(243, 244, 246);
+  
+  /* Surface / Card Colors */
+  --color-surface: rgb(255, 255, 255);
+  --color-surface-hover: rgb(250, 250, 250);
+  --color-surface-elevated: rgb(255, 255, 255);
+  
+  /* Text Colors */
+  --color-text-primary: rgb(55, 65, 81);
+  --color-text-secondary: rgb(107, 114, 128);
+  --color-text-tertiary: rgb(156, 163, 175);
+  --color-text-inverse: rgb(255, 255, 255);
+  
+  /* Border Colors */
+  --color-border: rgb(229, 231, 235);
+  --color-border-light: rgb(243, 244, 246);
+  --color-border-dark: rgb(209, 213, 219);
+  
+  /* Status Colors */
+  --color-success: rgb(34, 197, 94);
+  --color-success-light: rgb(74, 222, 128);
+  --color-success-dark: rgb(22, 163, 74);
+  
+  --color-warning: rgb(251, 191, 36);
+  --color-warning-light: rgb(253, 224, 71);
+  --color-warning-dark: rgb(217, 119, 6);
+  
+  --color-error: rgb(239, 68, 68);
+  --color-error-light: rgb(248, 113, 113);
+  --color-error-dark: rgb(220, 38, 38);
+  
+  --color-info: rgb(59, 130, 246);
+  --color-info-light: rgb(96, 165, 250);
+  --color-info-dark: rgb(37, 99, 235);
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;   /* 4px */
+  --spacing-sm: 0.5rem;    /* 8px */
+  --spacing-md: 1rem;      /* 16px */
+  --spacing-lg: 1.5rem;     /* 24px */
+  --spacing-xl: 2rem;       /* 32px */
+  --spacing-2xl: 3rem;      /* 48px */
+  --spacing-3xl: 4rem;      /* 64px */
+  
+  /* Typography */
+  --font-family-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-family-heading: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.875rem;   /* 14px */
+  --font-size-base: 1rem;     /* 16px */
+  --font-size-lg: 1.125rem;   /* 18px */
+  --font-size-xl: 1.25rem;    /* 20px */
+  --font-size-2xl: 1.5rem;    /* 24px */
+  --font-size-3xl: 1.875rem;  /* 30px */
+  --font-size-4xl: 2.25rem;   /* 36px */
+  
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  /* Border Radius */
+  --radius-sm: 0.25rem;   /* 4px */
+  --radius-md: 0.5rem;    /* 8px */
+  --radius-lg: 0.75rem;   /* 12px */
+  --radius-xl: 1rem;      /* 16px */
+  --radius-full: 9999px;
+  
+  /* Transitions */
+  --transition-fast: 150ms ease-in-out;
+  --transition-base: 300ms ease-in-out;
+  --transition-slow: 500ms ease-in-out;
+  
+  /* Layout */
+  --container-max-width: 1200px;
+  --header-height: 70px;
+  --footer-height: 60px;
+}
+
+/* ============================================
+   DARK MODE COLORS
+   ============================================ */
+.dark-mode,
+html.dark-mode {
+  /* Primary Colors - Lighter Blue for Dark Mode */
+  --color-primary: rgb(96, 165, 250);
+  --color-primary-dark: rgb(59, 130, 246);
+  --color-primary-light: rgb(147, 197, 253);
+  --color-primary-hover: rgb(147, 197, 253);
+  
+  /* Secondary Colors */
+  --color-secondary: rgb(147, 197, 253);
+  --color-secondary-dark: rgb(96, 165, 250);
+  --color-secondary-light: rgb(191, 219, 254);
+  --color-secondary-hover: rgb(191, 219, 254);
+  
+  /* Accent Color - Orange */
+  --color-accent: rgb(251, 146, 60);
+  --color-accent-dark: rgb(249, 115, 22);
+  --color-accent-light: rgb(253, 186, 116);
+  --color-accent-hover: rgb(253, 186, 116);
+  
+  /* Background Colors - Deep Gray (Not Pure Black) */
+  --color-bg-primary: rgb(17, 24, 39);
+  --color-bg-secondary: rgb(31, 41, 55);
+  --color-bg-tertiary: rgb(55, 65, 81);
+  
+  /* Surface / Card Colors */
+  --color-surface: rgb(31, 41, 55);
+  --color-surface-hover: rgb(37, 47, 63);
+  --color-surface-elevated: rgb(43, 53, 69);
+  
+  /* Text Colors */
+  --color-text-primary: rgb(243, 244, 246);
+  --color-text-secondary: rgb(209, 213, 219);
+  --color-text-tertiary: rgb(156, 163, 175);
+  --color-text-inverse: rgb(17, 24, 39);
+  
+  /* Border Colors */
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-border-light: rgba(255, 255, 255, 0.05);
+  --color-border-dark: rgba(255, 255, 255, 0.2);
+  
+  /* Status Colors - Adjusted for Dark Mode */
+  --color-success: rgb(74, 222, 128);
+  --color-success-light: rgb(134, 239, 172);
+  --color-success-dark: rgb(34, 197, 94);
+  
+  --color-warning: rgb(253, 224, 71);
+  --color-warning-light: rgb(254, 240, 138);
+  --color-warning-dark: rgb(251, 191, 36);
+  
+  --color-error: rgb(248, 113, 113);
+  --color-error-light: rgb(252, 165, 165);
+  --color-error-dark: rgb(239, 68, 68);
+  
+  --color-info: rgb(96, 165, 250);
+  --color-info-light: rgb(147, 197, 253);
+  --color-info-dark: rgb(59, 130, 246);
+  
+  /* Shadows - Lighter for Dark Mode */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.5);
+}
+
+/* ============================================
+   BASE STYLES
+   ============================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+body {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-heading);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-md);
+  transition: color var(--transition-base);
+}
+
+h1 { font-size: var(--font-size-4xl); }
+h2 { font-size: var(--font-size-3xl); }
+h3 { font-size: var(--font-size-2xl); }
+h4 { font-size: var(--font-size-xl); }
+h5 { font-size: var(--font-size-lg); }
+h6 { font-size: var(--font-size-base); }
+
+p {
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text-secondary);
+  transition: color var(--transition-base);
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-primary-hover);
+}
+
+/* Utility Classes */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.mt-sm { margin-top: var(--spacing-sm); }
+.mt-md { margin-top: var(--spacing-md); }
+.mt-lg { margin-top: var(--spacing-lg); }
+.mt-xl { margin-top: var(--spacing-xl); }
+
+.mb-sm { margin-bottom: var(--spacing-sm); }
+.mb-md { margin-bottom: var(--spacing-md); }
+.mb-lg { margin-bottom: var(--spacing-lg); }
+.mb-xl { margin-bottom: var(--spacing-xl); }
+
+.p-sm { padding: var(--spacing-sm); }
+.p-md { padding: var(--spacing-md); }
+.p-lg { padding: var(--spacing-lg); }
+.p-xl { padding: var(--spacing-xl); }

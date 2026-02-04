@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - JoinWork</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <style>
+        .profile-header {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            color: var(--color-text-inverse);
+            padding: var(--spacing-2xl) 0;
+            margin-bottom: var(--spacing-2xl);
+            transition: background var(--transition-base);
+        }
+        .profile-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: var(--spacing-xl);
+        }
+        @media (max-width: 768px) {
+            .profile-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        .profile-sidebar {
+            position: sticky;
+            top: calc(var(--header-height) + var(--spacing-xl));
+        }
+        .profile-actions {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+        .cv-preview {
+            background: var(--color-surface);
+            padding: var(--spacing-2xl);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            min-height: 800px;
+            transition: background-color var(--transition-base);
+        }
+        .cv-section {
+            margin-bottom: var(--spacing-xl);
+            padding-bottom: var(--spacing-lg);
+            border-bottom: 1px solid var(--color-border);
+            transition: border-color var(--transition-base);
+        }
+        .cv-section:last-child {
+            border-bottom: none;
+        }
+        .cv-name {
+            font-size: var(--font-size-3xl);
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+        .cv-contact {
+            color: var(--color-text-secondary);
+            margin-bottom: var(--spacing-lg);
+        }
+        .cv-skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
+        }
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+        }
+        .template-card {
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            text-align: center;
+            background: var(--color-surface);
+        }
+        .template-card:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+        .template-card.selected {
+            border-color: var(--color-primary);
+            background: var(--color-bg-tertiary);
+        }
+        .template-preview {
+            font-size: 48px;
+            margin-bottom: var(--spacing-md);
+        }
+        .template-name {
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-text-primary);
+            margin-bottom: var(--spacing-xs);
+            transition: color var(--transition-base);
+        }
+        .template-description {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            transition: color var(--transition-base);
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            transition: background var(--transition-base);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: var(--spacing-xl) var(--spacing-md);
+        }
+        .modal-content {
+            max-width: 700px;
+            margin: 0 auto;
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-2xl);
+            position: relative;
+            box-shadow: var(--shadow-xl);
+        }
+        .modal-close {
+            position: absolute;
+            top: var(--spacing-md);
+            right: var(--spacing-md);
+            background: none;
+            border: none;
+            font-size: var(--font-size-2xl);
+            cursor: pointer;
+            color: var(--color-text-light);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-full);
+            transition: all var(--transition-fast);
+        }
+        .modal-close:hover {
+            background: var(--color-bg-tertiary);
+            color: var(--color-text-primary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Dark Mode Toggle Button -->
+    <button id="dark-mode-toggle" class="btn btn-outline btn-sm" onclick="toggleDarkMode()" title="Toggle Dark Mode تبديل الوضع الداكن" style="position: fixed; top: 20px; right: 20px; z-index: 1000; background: var(--color-surface); border: 2px solid var(--color-primary);">
+        <span id="dark-mode-icon">🌙</span>
+    </button>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <a href="dashboard.html" class="header-logo">JoinWork</a>
+            <nav class="header-nav">
+                <a href="jobs.html">Jobs الوظائف</a>
+                <a href="workshops.html">Workshops ورش العمل</a>
+                <a href="profile.html">Profile الملف الشخصي</a>
+            </nav>
+            <div class="header-user">
+                <span id="user-name"></span>
+                <button class="btn btn-outline btn-sm" onclick="authAPI.logout()">Logout تسجيل الخروج</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="container">
+            <h1>My Profile ملفي الشخصي</h1>
+            <p>Manage your profile and CV<br>إدارة ملفك الشخصي وسيرتك الذاتية</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container page-container">
+        <div class="profile-content">
+            <!-- Sidebar -->
+            <div class="profile-sidebar">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Profile Actions إجراءات الملف الشخصي</h3>
+                    </div>
+                    <div class="profile-actions">
+                        <button class="btn btn-primary btn-full" onclick="editProfile()">Edit Profile تعديل الملف الشخصي</button>
+                        <button class="btn btn-secondary btn-full" onclick="generateCV()">Generate CV إنشاء السيرة الذاتية</button>
+                        <button class="btn btn-outline btn-full" onclick="exportPDF()">Export CV as PDF تصدير السيرة الذاتية كـ PDF</button>
+                        <button class="btn btn-outline btn-full" onclick="printCV()" style="margin-top: var(--spacing-sm);">Print CV طباعة السيرة الذاتية</button>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: var(--spacing-lg);">
+                    <div class="card-header">
+                        <h3 class="card-title">Quick Stats الإحصائيات السريعة</h3>
+                    </div>
+                    <div class="card-body" id="stats-content">
+                        <p>Loading... جاري التحميل...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CV Preview -->
+            <div class="cv-preview" id="cv-preview">
+                <div class="empty-state">
+                    <p>Loading your profile... جاري تحميل ملفك الشخصي...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>JoinWork</h4>
+                    <p>Connecting graduates with opportunities</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 JoinWork. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- CV Template Selection Modal -->
+    <div id="template-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+            <button onclick="closeTemplateModal()" class="modal-close">&times;</button>
+            <h2 style="margin-bottom: var(--spacing-lg);">Choose a CV Template اختر قالب السيرة الذاتية</h2>
+            <p style="color: var(--color-text-medium); margin-bottom: var(--spacing-lg);">Select a template to generate your professional CV<br>اختر قالباً لإنشاء سيرتك الذاتية الاحترافية</p>
+            
+            <div class="template-grid" id="template-grid">
+                <!-- Templates will be inserted here -->
+            </div>
+            
+            <div style="display: flex; gap: var(--spacing-md); margin-top: var(--spacing-xl);">
+                <button class="btn btn-primary btn-full" onclick="applySelectedTemplate()">Generate CV with Selected Template إنشاء السيرة الذاتية بالقالب المحدد</button>
+                <button class="btn btn-outline btn-full" onclick="closeTemplateModal()">Cancel إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="edit-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button onclick="closeEditModal()" class="modal-close">&times;</button>
+            <h2 style="margin-bottom: var(--spacing-lg);">Edit Profile تعديل الملف الشخصي</h2>
+            <form id="edit-profile-form" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="edit-profile-picture" class="form-label">Profile Picture صورة الملف الشخصي (Optional اختياري)</label>
+                    <input type="file" id="edit-profile-picture" name="profile_picture" class="form-input" accept="image/*">
+                    <span class="form-help">Upload a profile picture (JPG, PNG, max 2MB)<br>قم برفع صورة للملف الشخصي (JPG, PNG، الحد الأقصى 2MB)</span>
+                    <div id="profile-picture-preview" style="margin-top: var(--spacing-sm); display: none;">
+                        <img id="preview-img" src="" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: var(--radius-md); border: 2px solid var(--color-border);">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-full_name" class="form-label">Full Name الاسم الكامل *</label>
+                        <input type="text" id="edit-full_name" name="full_name" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-date_of_birth" class="form-label">Date of Birth تاريخ الميلاد *</label>
+                        <input type="date" id="edit-date_of_birth" name="date_of_birth" class="form-input" max="2006-12-31" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Gender الجنس *</label>
+                    <div class="role-selector" style="margin-top: var(--spacing-xs);">
+                        <label class="role-option" id="edit-gender-male">
+                            <input type="radio" name="gender" value="male">
+                            Male ذكر
+                        </label>
+                        <label class="role-option" id="edit-gender-female">
+                            <input type="radio" name="gender" value="female">
+                            Female أنثى
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="edit-email" class="form-label">Email البريد الإلكتروني *</label>
+                    <input type="email" id="edit-email" name="email" class="form-input" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-university" class="form-label">University الجامعة *</label>
+                        <input type="text" id="edit-university" name="university" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-major" class="form-label">Major التخصص *</label>
+                        <input type="text" id="edit-major" name="major" class="form-input" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-gpa" class="form-label">GPA المعدل التراكمي *</label>
+                        <input type="number" id="edit-gpa" name="gpa" class="form-input" step="0.01" min="0" max="4.0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-skills" class="form-label">Skills المهارات *</label>
+                        <input type="text" id="edit-skills" name="skills" class="form-input" placeholder="JavaScript, Python, React" required>
+                        <span class="form-help">Separate skills with commas<br>افصل المهارات بفواصل</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="edit-projects" class="form-label">Projects المشاريع</label>
+                    <textarea id="edit-projects" name="projects" class="form-textarea" rows="4" placeholder="Describe your projects... اشرح مشاريعك..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-experience" class="form-label">Experience الخبرة</label>
+                    <textarea id="edit-experience" name="experience" class="form-textarea" rows="4" placeholder="Describe your work experience... اشرح خبرتك العملية..."></textarea>
+                </div>
+                <div id="edit-alert"></div>
+                <div style="display: flex; gap: var(--spacing-md); margin-top: var(--spacing-lg);">
+                    <button type="submit" class="btn btn-primary btn-full">Save Changes حفظ التغييرات</button>
+                    <button type="button" class="btn btn-outline btn-full" onclick="closeEditModal()">Cancel إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/cv-generator.js"></script>
+    <script src="../js/cv-templates.js"></script>
+    <script>
+        let profileData = null;
+        let selectedTemplateId = 1; // Default template
+
+        // Check authentication
+        if (!isAuthenticated()) {
+            window.location.href = 'login.html';
+        }
+
+        // Load user data
+        const userData = getCurrentUser();
+        if (userData) {
+            document.getElementById('user-name').textContent = userData.full_name || userData.email;
+        }
+
+        // Timeout helper: reject after ms with message
+        function withTimeout(promise, ms, message) {
+            const timeout = new Promise(function(_, reject) {
+                setTimeout(function() { reject(new Error(message)); }, ms);
+            });
+            return Promise.race([promise, timeout]);
+        }
+
+        // Load profile
+        window.loadProfile = async function() {
+            const cvPreview = document.getElementById('cv-preview');
+            const statsContent = document.getElementById('stats-content');
+            const PROFILE_TIMEOUT_MS = 12000; // 12 seconds
+
+            try {
+                console.log('[PROFILE] Starting to load profile...');
+                const user = getCurrentUser();
+                if (!user) {
+                    console.error('[PROFILE] No user data found');
+                    if (cvPreview) {
+                        cvPreview.innerHTML = `
+                        <div class="alert alert-error">
+                            <strong>Error:</strong> No user data found. Please login again.<br>
+                            <strong>خطأ:</strong> لم يتم العثور على بيانات المستخدم. يرجى تسجيل الدخول مرة أخرى.
+                        </div>
+                    `;
+                    }
+                    if (statsContent) statsContent.innerHTML = '<p>—</p>';
+                    return;
+                }
+
+                console.log('[PROFILE] User found:', user.role, user.user_id);
+
+                if (user.role === 'graduate') {
+                    try {
+                        console.log('[PROFILE] Fetching graduate profile from API...');
+                        const response = await withTimeout(
+                            graduatesAPI.getProfileByUser(user.user_id),
+                            PROFILE_TIMEOUT_MS,
+                            'Connection timeout. تأكد من تشغيل الخادم (Backend) على المنفذ 3000 وافتح الموقع عبر http://localhost:3000/pages/profile.html وليس من ملف file://'
+                        );
+                        console.log('[PROFILE] API response:', response);
+                        if (response && response.graduate_id) {
+                            profileData = {
+                                full_name: response.full_name || user.full_name,
+                                email: response.email || user.email,
+                                university: response.university || 'Not set',
+                                major: response.major || 'Not set',
+                                GPA: response.GPA != null ? response.GPA : null,
+                                unified_card_number: response.unified_card_number || '',
+                                skills: response.skills || '',
+                                age: response.age || null,
+                                date_of_birth: response.date_of_birth || null,
+                                gender: response.gender || null,
+                                profile_picture: response.profile_picture || null,
+                                projects: response.projects || '',
+                                experience: response.experience || '',
+                                graduate_id: response.graduate_id
+                            };
+                            console.log('[PROFILE] Profile data loaded:', profileData);
+                        } else {
+                            throw new Error('Profile not found');
+                        }
+                    } catch (apiError) {
+                        console.log('[PROFILE] API error or not found, using default profile:', apiError);
+                        profileData = {
+                            full_name: user.full_name || 'Your Name',
+                            email: user.email || '',
+                            university: 'Not set',
+                            major: 'Not set',
+                            GPA: null,
+                            unified_card_number: '',
+                            skills: '',
+                            age: null,
+                            date_of_birth: null,
+                            gender: null,
+                            profile_picture: null,
+                            projects: '',
+                            experience: '',
+                            graduate_id: null
+                        };
+                        console.log('[PROFILE] Default profile data created:', profileData);
+                    }
+
+                    try {
+                        console.log('[PROFILE] Displaying CV...');
+                        displayCV();
+                        updateStats();
+                        console.log('[PROFILE] Profile loaded successfully');
+                    } catch (displayErr) {
+                        console.error('[PROFILE] Error in displayCV/updateStats:', displayErr);
+                        if (cvPreview) {
+                            cvPreview.innerHTML = `
+                                <div class="alert alert-error">
+                                    <strong>Error:</strong> Could not display profile. ${displayErr.message || ''}<br>
+                                    <button class="btn btn-primary" onclick="loadProfile()" style="margin-top: var(--spacing-md);">Retry إعادة المحاولة</button>
+                                </div>
+                            `;
+                        }
+                        if (statsContent) statsContent.innerHTML = '<p>—</p>';
+                    }
+                } else {
+                    console.log('[PROFILE] User is not a graduate, role:', user.role);
+                    if (cvPreview) {
+                        cvPreview.innerHTML = `
+                        <div class="empty-state">
+                            <p>Profile view is currently available for graduates only.<br>
+                            عرض الملف الشخصي متاح للخريجين فقط.</p>
+                        </div>
+                    `;
+                    }
+                    if (statsContent) statsContent.innerHTML = '<p>—</p>';
+                }
+            } catch (error) {
+                console.error('[PROFILE] Error loading profile:', error);
+                const msg = error && error.message ? error.message : 'Unknown error';
+                if (cvPreview) {
+                    cvPreview.innerHTML = `
+                        <div class="alert alert-error">
+                            <strong>Error:</strong> Failed to load profile. ${msg}<br>
+                            <strong>خطأ:</strong> فشل تحميل الملف الشخصي.
+                        </div>
+                        <p style="margin-top: var(--spacing-md); color: var(--color-text-secondary); font-size: var(--font-size-sm);">
+                            تأكد من تشغيل الخادم (Backend) ثم افتح الموقع عبر <strong>http://localhost:3000/pages/profile.html</strong> وليس من ملف file://
+                        </p>
+                        <div style="margin-top: var(--spacing-md);">
+                            <button class="btn btn-primary" onclick="loadProfile()">Retry إعادة المحاولة</button>
+                        </div>
+                    `;
+                }
+                if (statsContent) statsContent.innerHTML = '<p>—</p>';
+            }
+        }
+
+        // Display CV using professional generator
+        function displayCV() {
+            if (!profileData) {
+                console.error('No profile data available');
+                document.getElementById('cv-preview').innerHTML = `
+                    <div class="empty-state">
+                        <p>No profile data available. Please edit your profile to add information.<br>
+                        لا توجد بيانات للملف الشخصي. يرجى تعديل ملفك الشخصي لإضافة المعلومات.</p>
+                        <button class="btn btn-primary" onclick="editProfile()">Edit Profile تعديل الملف الشخصي</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            try {
+                // Use template system if available, otherwise use default preview
+                let cvHTML;
+                if (typeof getTemplate !== 'undefined' && typeof CV_TEMPLATES !== 'undefined') {
+                    cvHTML = getTemplate(selectedTemplateId, profileData);
+                } else if (typeof generateCVPreview !== 'undefined') {
+                    cvHTML = generateCVPreview(profileData);
+                } else {
+                    // Fallback: simple display
+                    const escapeHTML = (text) => {
+                        if (!text) return '';
+                        const div = document.createElement('div');
+                        div.textContent = text;
+                        return div.innerHTML;
+                    };
+                    cvHTML = `
+                        <div class="cv-section" style="padding: var(--spacing-xl);">
+                            <h1 style="color: var(--color-primary); margin-bottom: var(--spacing-md);">${escapeHTML(profileData.full_name || 'Your Name')}</h1>
+                            <p style="margin: var(--spacing-sm) 0;"><strong>Email:</strong> ${escapeHTML(profileData.email || '')}</p>
+                            ${profileData.university && profileData.university !== 'Not set' ? `<p style="margin: var(--spacing-sm) 0;"><strong>University:</strong> ${escapeHTML(profileData.university)}</p>` : ''}
+                            ${profileData.major && profileData.major !== 'Not set' ? `<p style="margin: var(--spacing-sm) 0;"><strong>Major:</strong> ${escapeHTML(profileData.major)}</p>` : ''}
+                            ${profileData.skills ? `<p style="margin: var(--spacing-sm) 0;"><strong>Skills:</strong> ${escapeHTML(profileData.skills)}</p>` : ''}
+                            ${profileData.GPA ? `<p style="margin: var(--spacing-sm) 0;"><strong>GPA:</strong> ${profileData.GPA.toFixed(2)}</p>` : ''}
+                            <div style="margin-top: var(--spacing-lg);">
+                                <button class="btn btn-primary" onclick="editProfile()">Edit Profile تعديل الملف الشخصي</button>
+                            </div>
+                        </div>
+                    `;
+                }
+                const cvPreview = document.getElementById('cv-preview');
+                if (cvPreview) {
+                    cvPreview.innerHTML = cvHTML;
+                } else {
+                    console.error('CV preview element not found');
+                }
+            } catch (error) {
+                console.error('Error displaying CV:', error);
+                const cvPreview = document.getElementById('cv-preview');
+                if (cvPreview) {
+                    cvPreview.innerHTML = `
+                        <div class="alert alert-error">
+                            <strong>Error:</strong> Failed to generate CV preview. ${error.message || ''}<br>
+                            <strong>خطأ:</strong> فشل إنشاء معاينة السيرة الذاتية. ${error.message || ''}
+                        </div>
+                        <div style="margin-top: var(--spacing-md);">
+                            <button class="btn btn-primary" onclick="editProfile()">Edit Profile تعديل الملف الشخصي</button>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Update stats
+        function updateStats() {
+            if (!profileData) {
+                const statsContent = document.getElementById('stats-content');
+                if (statsContent) {
+                    statsContent.innerHTML = `
+                        <p>No profile data available<br>لا توجد بيانات متاحة</p>
+                    `;
+                }
+                return;
+            }
+            const stats = `
+                <p><strong>Profile Completeness:</strong> ${calculateCompleteness()}%</p>
+                <p><strong>Skills:</strong> ${profileData.skills ? parseSkills(profileData.skills).length : 0}</p>
+                <p><strong>GPA:</strong> ${profileData.GPA ? profileData.GPA.toFixed(2) : 'Not set'}</p>
+            `;
+            const statsContent = document.getElementById('stats-content');
+            if (statsContent) {
+                statsContent.innerHTML = stats;
+            }
+        }
+
+        // Calculate profile completeness
+        function calculateCompleteness() {
+            if (!profileData) return 0;
+            let completed = 0;
+            let total = 6;
+            
+            if (profileData.full_name) completed++;
+            if (profileData.email) completed++;
+            if (profileData.university && profileData.university !== 'Not set') completed++;
+            if (profileData.major && profileData.major !== 'Not set') completed++;
+            if (profileData.skills) completed++;
+            if (profileData.GPA) completed++;
+            
+            return Math.round((completed / total) * 100);
+        }
+
+        // Open edit modal
+        window.editProfile = function() {
+            // Always allow editing, even if profileData is null (will create new profile)
+            if (!profileData) {
+                // Initialize with user data if profile doesn't exist
+                const user = getCurrentUser();
+                profileData = {
+                    full_name: user ? (user.full_name || '') : '',
+                    email: user ? (user.email || '') : '',
+                    university: 'Not set',
+                    major: 'Not set',
+                    GPA: null,
+                    skills: '',
+                    age: null,
+                    date_of_birth: null,
+                    gender: null,
+                    profile_picture: null,
+                    projects: '',
+                    experience: '',
+                    graduate_id: null
+                };
+            }
+            
+            // Populate form
+            document.getElementById('edit-full_name').value = profileData.full_name || '';
+            if (profileData.date_of_birth) {
+                document.getElementById('edit-date_of_birth').value = profileData.date_of_birth;
+            } else if (profileData.age) {
+                // Calculate date of birth from age (approximate)
+                const today = new Date();
+                const birthYear = today.getFullYear() - profileData.age;
+                document.getElementById('edit-date_of_birth').value = `${birthYear}-01-01`;
+            }
+            document.getElementById('edit-email').value = profileData.email || '';
+            if (profileData.gender) {
+                if (profileData.gender === 'male') {
+                    document.getElementById('edit-gender-male').classList.add('active');
+                    document.getElementById('edit-gender-male').querySelector('input').checked = true;
+                } else {
+                    document.getElementById('edit-gender-female').classList.add('active');
+                    document.getElementById('edit-gender-female').querySelector('input').checked = true;
+                }
+            }
+            document.getElementById('edit-university').value = profileData.university !== 'Not set' ? profileData.university : '';
+            document.getElementById('edit-major').value = profileData.major !== 'Not set' ? profileData.major : '';
+            document.getElementById('edit-gpa').value = profileData.GPA || '';
+            document.getElementById('edit-skills').value = profileData.skills || '';
+            document.getElementById('edit-projects').value = profileData.projects || '';
+            document.getElementById('edit-experience').value = profileData.experience || '';
+            
+            // Show profile picture if exists
+            if (profileData.profile_picture) {
+                const previewDiv = document.getElementById('profile-picture-preview');
+                const previewImg = document.getElementById('preview-img');
+                previewImg.src = profileData.profile_picture;
+                previewDiv.style.display = 'block';
+            }
+            
+            document.getElementById('edit-modal').style.display = 'block';
+        }
+        
+        // Preview profile picture
+        document.getElementById('edit-profile-picture')?.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('File size must be less than 2MB\nيجب أن يكون حجم الملف أقل من 2MB');
+                    e.target.value = '';
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewDiv = document.getElementById('profile-picture-preview');
+                    const previewImg = document.getElementById('preview-img');
+                    previewImg.src = e.target.result;
+                    previewDiv.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Gender selector in edit modal
+        const editGenderOptions = document.querySelectorAll('#edit-modal .role-option');
+        editGenderOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                editGenderOptions.forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
+                this.querySelector('input[type="radio"]').checked = true;
+            });
+        });
+
+        // Close edit modal
+        window.closeEditModal = function() {
+            const modal = document.getElementById('edit-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        // Handle edit form submission
+        document.getElementById('edit-profile-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const alertContainer = document.getElementById('edit-alert');
+            alertContainer.innerHTML = '';
+
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            // Validation
+            if (!data.full_name || !data.email || !data.university || !data.major || !data.gpa || !data.skills || !data.date_of_birth || !data.gender) {
+                showError(alertContainer, 'Please fill in all required fields\nيرجى ملء جميع الحقول المطلوبة');
+                return;
+            }
+
+            if (!isValidEmail(data.email)) {
+                showError(alertContainer, 'Please enter a valid email address\nيرجى إدخال عنوان بريد إلكتروني صحيح');
+                return;
+            }
+
+            if (parseFloat(data.gpa) < 0 || parseFloat(data.gpa) > 4.0) {
+                showError(alertContainer, 'GPA must be between 0 and 4.0\nيجب أن يكون المعدل بين 0 و 4.0');
+                return;
+            }
+
+            try {
+                const user = getCurrentUser();
+                
+                // Calculate age from date of birth
+                let age = null;
+                if (data.date_of_birth) {
+                    const birthDate = new Date(data.date_of_birth);
+                    const today = new Date();
+                    age = today.getFullYear() - birthDate.getFullYear();
+                    const monthDiff = today.getMonth() - birthDate.getMonth();
+                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                        age--;
+                    }
+                }
+                
+                const updateData = {
+                    university: data.university,
+                    major: data.major,
+                    GPA: parseFloat(data.gpa),
+                    skills: data.skills,
+                    date_of_birth: data.date_of_birth,
+                    gender: data.gender,
+                    age: age,
+                    projects: data.projects || '',
+                    experience: data.experience || ''
+                };
+                
+                // Handle profile picture if uploaded
+                const profilePictureFile = document.getElementById('edit-profile-picture').files[0];
+                if (profilePictureFile) {
+                    const reader = new FileReader();
+                    reader.onload = async function(e) {
+                        updateData.profile_picture = e.target.result; // Base64 encoded image
+                        await saveProfileUpdate(updateData, alertContainer);
+                    };
+                    reader.readAsDataURL(profilePictureFile);
+                } else {
+                    await saveProfileUpdate(updateData, alertContainer);
+                }
+            } catch (error) {
+                showError(alertContainer, error.message || 'Failed to update profile\nفشل تحديث الملف الشخصي');
+            }
+        });
+        
+        // Helper function to save profile update
+        async function saveProfileUpdate(updateData, alertContainer) {
+            try {
+                const user = getCurrentUser();
+                const formData = new FormData(document.getElementById('edit-profile-form'));
+                const data = Object.fromEntries(formData.entries());
+
+                // Update via API
+                if (profileData.graduate_id) {
+                    // Profile exists, update it
+                    await graduatesAPI.updateProfile(profileData.graduate_id, updateData);
+                } else {
+                    // Profile doesn't exist yet, try to find it by user_id first
+                    try {
+                        const existingProfile = await graduatesAPI.getProfileByUser(user.user_id);
+                        if (existingProfile && existingProfile.graduate_id) {
+                            // Found it, update it
+                            profileData.graduate_id = existingProfile.graduate_id;
+                            await graduatesAPI.updateProfile(existingProfile.graduate_id, updateData);
+                        } else {
+                            throw new Error('Profile not found');
+                        }
+                    } catch (findError) {
+                        // Profile doesn't exist, create it
+                        try {
+                            const newProfile = await graduatesAPI.createProfile(updateData);
+                            profileData.graduate_id = newProfile.graduate_id;
+                            showSuccess(alertContainer, 'Profile created successfully!\nتم إنشاء الملف الشخصي بنجاح!');
+                        } catch (createError) {
+                            showError(alertContainer, 'Failed to create profile: ' + (createError.message || 'Unknown error') + '\nفشل إنشاء الملف الشخصي: ' + (createError.message || 'خطأ غير معروف'));
+                            console.error('Create profile error:', createError);
+                            return;
+                        }
+                    }
+                }
+                
+                // Update local data after successful API call
+                profileData = {
+                    ...profileData,
+                    ...updateData,
+                    full_name: data.full_name,
+                    email: data.email
+                };
+
+                // Update user data in localStorage
+                const userData = getCurrentUser();
+                if (userData) {
+                    userData.full_name = data.full_name;
+                    userData.email = data.email;
+                    localStorage.setItem('userData', JSON.stringify(userData));
+                    document.getElementById('user-name').textContent = data.full_name;
+                }
+
+                showSuccess(alertContainer, 'Profile updated successfully!\nتم تحديث الملف الشخصي بنجاح!');
+                
+                // Refresh CV and stats
+                displayCV();
+                updateStats();
+
+                // Close modal after 1.5 seconds
+                setTimeout(() => {
+                    closeEditModal();
+                }, 1500);
+
+            } catch (error) {
+                showError(alertContainer, error.message || 'Failed to update profile\nفشل تحديث الملف الشخصي');
+            }
+        });
+
+        // Generate CV - Show template selection first
+        window.generateCV = function() {
+            if (!profileData) {
+                alert('Please load your profile first.\nيرجى تحميل ملفك الشخصي أولاً.');
+                loadProfile();
+                return;
+            }
+            
+            // Show template selection modal
+            showTemplateModal();
+        }
+        
+        // Show template selection modal
+        window.showTemplateModal = function() {
+            const modal = document.getElementById('template-modal');
+            const grid = document.getElementById('template-grid');
+            
+            if (!modal || !grid) {
+                console.error('Template modal elements not found');
+                return;
+            }
+            
+            // Clear previous templates
+            grid.innerHTML = '';
+            
+            // Check if CV_TEMPLATES is available
+            if (typeof CV_TEMPLATES === 'undefined') {
+                console.error('CV_TEMPLATES not defined');
+                grid.innerHTML = '<p>Error loading templates. Please refresh the page.</p>';
+                modal.style.display = 'block';
+                return;
+            }
+            
+            // Add template cards
+            CV_TEMPLATES.forEach(template => {
+                const card = document.createElement('div');
+                card.className = 'template-card';
+                if (template.id === selectedTemplateId) {
+                    card.classList.add('selected');
+                }
+                card.onclick = () => selectTemplate(template.id);
+                
+                card.innerHTML = `
+                    <div class="template-preview">${template.preview}</div>
+                    <div class="template-name">${template.name}</div>
+                    <div class="template-description">${template.description}</div>
+                `;
+                
+                grid.appendChild(card);
+            });
+            
+            modal.style.display = 'block';
+        }
+        
+        // Close template modal
+        window.closeTemplateModal = function() {
+            const modal = document.getElementById('template-modal');
+            if (modal) modal.style.display = 'none';
+        }
+        
+        // Select template
+        window.selectTemplate = function(templateId) {
+            selectedTemplateId = templateId;
+            
+            // Update visual selection
+            document.querySelectorAll('.template-card').forEach((card, index) => {
+                if (CV_TEMPLATES[index].id === templateId) {
+                    card.classList.add('selected');
+                } else {
+                    card.classList.remove('selected');
+                }
+            });
+        }
+        
+        // Apply selected template and generate CV
+        window.applySelectedTemplate = async function() {
+            if (!profileData) {
+                alert('Please load your profile first.');
+                return;
+            }
+            
+            // Save current profileData before reloading
+            const currentProfileData = { ...profileData };
+            
+            try {
+                // Try to reload profile data from API to get latest updates
+                const user = getCurrentUser();
+                if (user && user.user_id) {
+                    try {
+                        const response = await graduatesAPI.getProfileByUser(user.user_id);
+                        if (response && response.graduate_id) {
+                            // Update profileData with API response, but keep current full_name if API doesn't have it
+                            profileData = {
+                                full_name: response.full_name || currentProfileData.full_name || user.full_name || 'Your Name',
+                                email: response.email || currentProfileData.email || user.email,
+                                university: response.university || currentProfileData.university || 'Not set',
+                                major: response.major || currentProfileData.major || 'Not set',
+                                GPA: response.GPA !== null && response.GPA !== undefined ? response.GPA : (currentProfileData.GPA !== null ? currentProfileData.GPA : null),
+                                skills: response.skills || currentProfileData.skills || '',
+                                age: response.age !== null && response.age !== undefined ? response.age : (currentProfileData.age !== null ? currentProfileData.age : null),
+                                projects: response.projects || currentProfileData.projects || '',
+                                experience: response.experience || currentProfileData.experience || '',
+                                graduate_id: response.graduate_id || currentProfileData.graduate_id
+                            };
+                        }
+                    } catch (apiError) {
+                        console.log('Could not reload from API, using current data:', apiError);
+                        // Keep current profileData, just ensure full_name is set
+                        if (!profileData.full_name || profileData.full_name === 'User') {
+                            const user = getCurrentUser();
+                            profileData.full_name = user ? (user.full_name || 'Your Name') : 'Your Name';
+                        }
+                    }
+                } else {
+                    // No user, ensure we have a name
+                    if (!profileData.full_name || profileData.full_name === 'User') {
+                        profileData.full_name = 'Your Name';
+                    }
+                }
+            } catch (error) {
+                console.error('Error reloading profile:', error);
+                // Keep current profileData, just ensure full_name is set
+                if (!profileData.full_name || profileData.full_name === 'User') {
+                    const user = getCurrentUser();
+                    profileData.full_name = user ? (user.full_name || 'Your Name') : 'Your Name';
+                }
+            }
+            
+            // Close modal
+            closeTemplateModal();
+            
+            // Generate and display CV with selected template
+            displayCVWithTemplate(selectedTemplateId);
+            updateStats();
+            
+            // Show success message with animation
+            const preview = document.getElementById('cv-preview');
+            preview.style.transition = 'all 0.3s ease';
+            preview.style.transform = 'scale(1.02)';
+            preview.style.boxShadow = '0 0 20px rgba(74, 144, 226, 0.3)';
+            
+            setTimeout(() => {
+                preview.style.transform = 'scale(1)';
+                preview.style.boxShadow = '';
+            }, 300);
+            
+            // Show notification
+            const templateName = CV_TEMPLATES.find(t => t.id === selectedTemplateId)?.name || 'Template';
+            showSuccessNotification(`CV generated with ${templateName} template!`);
+        }
+        
+        // Display CV with specific template
+        function displayCVWithTemplate(templateId) {
+            if (!profileData) return;
+            const cvHTML = getTemplate(templateId, profileData);
+            document.getElementById('cv-preview').innerHTML = cvHTML;
+        }
+        
+        // Update displayCV to use selected template
+        function displayCV() {
+            displayCVWithTemplate(selectedTemplateId);
+        }
+        
+        // Close template modal when clicking outside
+        document.getElementById('template-modal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeTemplateModal();
+            }
+        });
+        
+        // Show success notification
+        function showSuccessNotification(message) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: var(--color-success);
+                color: white;
+                padding: var(--spacing-md) var(--spacing-lg);
+                border-radius: var(--radius-md);
+                box-shadow: var(--shadow-lg);
+                z-index: 2000;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            
+            // Add animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                    document.head.removeChild(style);
+                }, 300);
+            }, 3000);
+        }
+
+        // Export PDF using jsPDF and html2canvas
+        window.exportPDF = async function() {
+            if (!profileData) {
+                alert('Please load your profile first.\nيرجى تحميل ملفك الشخصي أولاً.');
+                await loadProfile();
+                if (!profileData) return;
+            }
+
+            try {
+                // Load libraries if needed
+                if (typeof window.jspdf === 'undefined') {
+                    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                }
+                if (typeof html2canvas === 'undefined') {
+                    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                }
+
+                // Make sure CV is displayed
+                displayCV();
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                // Get the CV preview element
+                const cvElement = document.getElementById('cv-preview');
+                
+                // Create a temporary container with proper styling for PDF
+                const tempContainer = document.createElement('div');
+                tempContainer.style.cssText = `
+                    position: absolute;
+                    left: -9999px;
+                    top: 0;
+                    width: 210mm;
+                    min-height: 297mm;
+                    padding: 20mm;
+                    background: white;
+                    font-family: Arial, sans-serif;
+                `;
+                
+                // Generate CV content with selected template (use template system if available)
+                let cvHTML;
+                if (typeof getTemplate !== 'undefined') {
+                    cvHTML = getTemplate(selectedTemplateId, profileData);
+                } else {
+                    // Fallback to default preview
+                    cvHTML = generateCVPreview(profileData);
+                }
+                tempContainer.innerHTML = cvHTML;
+                document.body.appendChild(tempContainer);
+                
+                // Wait for rendering
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // Convert to canvas
+                const canvas = await html2canvas(tempContainer, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#ffffff',
+                    width: tempContainer.scrollWidth,
+                    height: tempContainer.scrollHeight
+                });
+                
+                // Get PDF library
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                
+                // Calculate dimensions
+                const imgWidth = 210; // A4 width in mm
+                const pageHeight = 297; // A4 height in mm
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+                
+                // Add first page
+                pdf.addImage(canvas.toDataURL('image/jpeg', 1.0), 'JPEG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                
+                // Add additional pages if needed
+                while (heightLeft > 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(canvas.toDataURL('image/jpeg', 1.0), 'JPEG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                
+                // Save PDF
+                const filename = `${(profileData.full_name || 'CV').replace(/[^a-z0-9]/gi, '_')}_Resume.pdf`;
+                pdf.save(filename);
+                
+                // Clean up
+                document.body.removeChild(tempContainer);
+                
+                showSuccessNotification('PDF exported successfully!');
+            } catch (error) {
+                console.error('PDF export error:', error);
+                alert('Failed to export PDF. Error: ' + error.message + '\n\nTry using the Print CV button instead (Ctrl+P).');
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('edit-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEditModal();
+            }
+        });
+
+        // Print CV
+        window.printCV = function() {
+            if (!profileData) {
+                alert('Please load your profile first.\nيرجى تحميل ملفك الشخصي أولاً.');
+                loadProfile();
+                if (!profileData) return;
+            }
+            
+            // Generate CV first
+            displayCV();
+            
+            // Wait a moment, then open print dialog
+            setTimeout(() => {
+                const printWindow = window.open('', '_blank');
+                const cvContent = document.getElementById('cv-preview').innerHTML;
+                
+                printWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>CV - ${profileData.full_name || 'Resume'}</title>
+                        <style>
+                            @media print {
+                                @page {
+                                    size: A4;
+                                    margin: 15mm;
+                                }
+                            }
+                            body {
+                                font-family: Arial, sans-serif;
+                                padding: 20px;
+                                color: #333;
+                                line-height: 1.6;
+                            }
+                            .cv-section {
+                                margin-bottom: 20px;
+                            }
+                            h1, h2, h3 {
+                                color: #4A90E2;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        ${cvContent}
+                    </body>
+                    </html>
+                `);
+                printWindow.document.close();
+                printWindow.focus();
+                printWindow.print();
+            }, 500);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async function() {
+            initDarkMode();
+            // Wait a bit for scripts to load
+            await new Promise(resolve => setTimeout(resolve, 100));
+            try {
+                await loadProfile();
+            } catch (error) {
+                console.error('Error initializing profile page:', error);
+                document.getElementById('cv-preview').innerHTML = `
+                    <div class="alert alert-error">
+                        <strong>Error:</strong> Failed to initialize profile page. Please refresh.<br>
+                        <strong>خطأ:</strong> فشل تهيئة صفحة الملف الشخصي. يرجى تحديث الصفحة.
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
+

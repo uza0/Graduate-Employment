@@ -1,0 +1,20 @@
+{
+  "name": "joinwork",
+  "version": "1.0.0",
+  "description": "Graduate Employment & Training System",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "graduate",
+    "employment",
+    "training",
+    "platform"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {}
+}
+

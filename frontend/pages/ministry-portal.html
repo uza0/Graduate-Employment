@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ministry Portal - JoinWork</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/ministry.css">
+</head>
+<body>
+    <div class="ministry-shell">
+        <aside class="sidebar">
+            <a class="logo" href="ministry-portal.html">Ministry Portal</a>
+            <div class="section-title">Public</div>
+            <nav class="nav">
+                <a href="./ministry/registrations.html">Student Registration</a>
+                <a href="./ministry/workshops.html">Workshops</a>
+                <a href="./ministry/announcements.html">Announcements</a>
+                <a href="./ministry/services.html">Citizen Services</a>
+                <a href="./ministry/contact.html">Contact & Support</a>
+            </nav>
+            <div class="section-title">Admin</div>
+            <nav class="nav">
+                <a href="./ministry/admin-registrations.html">Applications</a>
+                <a href="./ministry/admin-workshops.html">Workshops</a>
+                <a href="./ministry/admin-announcements.html">Announcements</a>
+                <a href="./ministry/reports.html">Reports & Analytics</a>
+                <a href="./ministry/admin-messages.html">Messages</a>
+            </nav>
+            <div class="footer">© 2025 Ministry of Employment</div>
+        </aside>
+
+        <main>
+            <div class="topbar">
+                <div class="title">Ministry Portal Home</div>
+                <div class="actions">
+                    <button id="dark-mode-toggle" class="btn btn-outline btn-sm" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+                        <span id="dark-mode-icon">🌙</span>
+                    </button>
+                    <span id="user-name"></span>
+                    <button class="btn btn-outline btn-sm" onclick="authAPI.logout()">Logout</button>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="page-header">
+                    <div>
+                        <h1>Welcome to the Ministry Portal</h1>
+                        <p>Manage student employment, workshops, announcements, analytics, and citizen services.</p>
+                    </div>
+                </div>
+
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <h3>Student Registration</h3>
+                        <p>Collect interview applications.</p>
+                        <button class="btn btn-primary btn-sm" onclick="window.location.href='./ministry/registrations.html'">Open Page</button>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Workshops</h3>
+                        <p>Manage training & enrollment.</p>
+                        <button class="btn btn-primary btn-sm" onclick="window.location.href='./ministry/workshops.html'">Open Page</button>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Announcements</h3>
+                        <p>Publish official news.</p>
+                        <button class="btn btn-primary btn-sm" onclick="window.location.href='./ministry/announcements.html'">Open Page</button>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Analytics</h3>
+                        <p>View KPIs and reports.</p>
+                        <button class="btn btn-primary btn-sm" onclick="window.location.href='./ministry/reports.html'">Open Page</button>
+                    </div>
+                </div>
+
+                <div class="card-split" style="margin-top: var(--spacing-lg);">
+                    <div class="card">
+                        <h3>Admin Quick Links</h3>
+                        <div class="list" style="gap: var(--spacing-sm);">
+                            <a class="btn btn-outline btn-full" href="./ministry/admin-registrations.html">Review Applications</a>
+                            <a class="btn btn-outline btn-full" href="./ministry/admin-workshops.html">Manage Workshops</a>
+                            <a class="btn btn-outline btn-full" href="./ministry/admin-announcements.html">Manage Announcements</a>
+                            <a class="btn btn-outline btn-full" href="./ministry/admin-messages.html">Reply to Messages</a>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>Citizen Services</h3>
+                        <p style="color: var(--color-text-secondary);">Services, procedures, and required documents for citizens.</p>
+                        <button class="btn btn-primary" onclick="window.location.href='./ministry/services.html'">View Services</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script>
+        if (!isAuthenticated()) {
+            window.location.href = 'login.html';
+        }
+        const userData = getCurrentUser();
+        if (userData) {
+            const userEl = document.getElementById('user-name');
+            if (userEl) userEl.textContent = userData.full_name || userData.email;
+        }
+    </script>
+</body>
+</html>

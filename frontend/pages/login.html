@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - JoinWork</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            padding: var(--spacing-lg);
+            transition: background var(--transition-base);
+        }
+        .login-card {
+            background: var(--color-surface);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            padding: var(--spacing-3xl);
+            width: 100%;
+            max-width: 450px;
+            transition: background-color var(--transition-base), box-shadow var(--transition-base);
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+        }
+        .login-header h1 {
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+        .login-header p {
+            color: var(--color-text-secondary);
+        }
+        .alert {
+            margin-bottom: var(--spacing-lg);
+        }
+    </style>
+</head>
+<body>
+    <!-- Dark Mode Toggle Button -->
+    <button id="dark-mode-toggle" class="btn btn-outline btn-sm" onclick="toggleDarkMode()" title="Toggle Dark Mode" style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+        <span id="dark-mode-icon">🌙</span>
+    </button>
+    
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>JoinWork</h1>
+                <p>Sign in to your account<br>تسجيل الدخول إلى حسابك</p>
+            </div>
+
+            <div id="alert-container"></div>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="email" class="form-label">Email or Username البريد الإلكتروني أو اسم المستخدم</label>
+                    <input 
+                        type="text" 
+                        id="email" 
+                        name="email" 
+                        class="form-input" 
+                        placeholder="Enter your email أدخل بريدك الإلكتروني"
+                        required
+                        autocomplete="email"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Password كلمة المرور</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        class="form-input" 
+                        placeholder="Enter your password أدخل كلمة المرور"
+                        required
+                        autocomplete="current-password"
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full btn-lg">
+                    Sign In تسجيل الدخول
+                </button>
+            </form>
+
+            <div style="text-align: center; margin-top: var(--spacing-lg);">
+                <p style="color: var(--color-text-medium);">
+                    Don't have an account? ليس لديك حساب؟ 
+                    <a href="signup.html" style="color: var(--color-primary); font-weight: var(--font-weight-medium);">
+                        Create account إنشاء حساب
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script>
+        // Check if already logged in
+        if (isAuthenticated()) {
+            const userRole = getUserRole();
+            if (userRole === 'graduate') {
+                window.location.href = 'dashboard.html';
+            } else if (userRole === 'company') {
+                window.location.href = 'company-portal.html';
+            } else if (userRole === 'ministry') {
+                window.location.href = 'ministry-portal.html';
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const alertContainer = document.getElementById('alert-container');
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            // Clear previous alerts
+            alertContainer.innerHTML = '';
+
+            // Basic validation
+            if (!email || !password) {
+                showError(alertContainer, 'Please fill in all fields');
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                showError(alertContainer, 'Please enter a valid email address');
+                return;
+            }
+
+            // Disable submit button
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Signing in...';
+
+            try {
+                // Call login API
+                const response = await authAPI.login(email, password);
+                
+                // Store token and user data
+                localStorage.setItem('authToken', response.token);
+                localStorage.setItem('userData', JSON.stringify(response.user));
+
+                // Show success message
+                showSuccess(alertContainer, 'Login successful! Redirecting...');
+
+                // Redirect based on role
+                setTimeout(() => {
+                    const role = response.user.role;
+                    if (role === 'graduate') {
+                        window.location.href = 'dashboard.html';
+                    } else if (role === 'company') {
+                        window.location.href = 'company-portal.html';
+                    } else if (role === 'ministry') {
+                        window.location.href = 'ministry-portal.html';
+                    } else {
+                        window.location.href = 'dashboard.html';
+                    }
+                }, 1000);
+
+            } catch (error) {
+                console.error('[LOGIN ERROR]', error);
+                console.error('[LOGIN ERROR] Message:', error.message);
+                
+                // Show error message with more details
+                let errorMessage = 'Login failed. Please check your credentials.';
+                if (error.message) {
+                    errorMessage = error.message;
+                }
+                
+                // Check if backend is running
+                if (error.message && error.message.includes('Failed to fetch')) {
+                    errorMessage = 'Cannot connect to server. Please make sure the backend server is running.';
+                }
+                
+                showError(alertContainer, errorMessage);
+                
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+        
+        // Initialize dark mode
+        document.addEventListener('DOMContentLoaded', function() {
+            initDarkMode();
+        });
+    </script>
+</body>
+</html>
+

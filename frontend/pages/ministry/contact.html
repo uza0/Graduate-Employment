@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact & Support - Ministry Portal</title>
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/ministry.css">
+</head>
+<body>
+  <div class="ministry-shell">
+    <aside class="sidebar">
+      <a class="logo" href="../ministry-portal.html">Ministry Portal</a>
+      <div class="section-title">Public</div>
+      <nav class="nav">
+        <a href="./registrations.html">Student Registration</a>
+        <a href="./workshops.html">Workshops</a>
+        <a href="./announcements.html">Announcements</a>
+        <a href="./services.html">Citizen Services</a>
+        <a href="./contact.html" class="active">Contact & Support</a>
+      </nav>
+      <div class="section-title">Admin</div>
+      <nav class="nav">
+        <a href="./admin-registrations.html">Applications (Admin)</a>
+        <a href="./admin-workshops.html">Workshops (Admin)</a>
+        <a href="./admin-announcements.html">Announcements (Admin)</a>
+        <a href="./reports.html">Reports & Analytics</a>
+        <a href="./admin-messages.html">Messages (Admin)</a>
+      </nav>
+      <div class="footer">© 2025 Ministry of Employment</div>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div class="title">Contact & Support</div>
+        <div class="actions">
+          <button id="dark-mode-toggle" class="btn btn-outline btn-sm" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+            <span id="dark-mode-icon">🌙</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="page-header">
+          <div>
+            <h1>Need Assistance?</h1>
+            <p>Submit your inquiry and the ministry support team will respond.</p>
+          </div>
+        </div>
+
+        <div class="card-split">
+          <div class="card">
+            <h3>Contact Form</h3>
+            <form id="contact-form" class="list">
+              <div class="form-group">
+                <label class="form-label" for="name">Full Name *</label>
+                <input class="form-input" id="name" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="email">Email *</label>
+                <input class="form-input" id="email" type="email" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="subject">Subject *</label>
+                <input class="form-input" id="subject" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="message">Message *</label>
+                <textarea class="form-textarea" id="message" rows="4" required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary btn-full">Send Message</button>
+              <div id="form-alert"></div>
+            </form>
+          </div>
+
+          <div class="card">
+            <h3>Support Info</h3>
+            <p style="color: var(--color-text-secondary);">You can also reach us via:</p>
+            <ul style="color: var(--color-text-secondary); padding-left: 1.25rem; list-style: disc;">
+              <li>Email: support@ministry.gov</li>
+              <li>Phone: +964 (0) 1 234 5678</li>
+              <li>Office Hours: Sun-Thu, 9:00–15:00</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/ministry-data.js"></script>
+  <script>
+    const form = document.getElementById('contact-form');
+    const alertBox = document.getElementById('form-alert');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      alertBox.innerHTML = '';
+      const payload = {
+        name: form.name.value.trim(),
+        email: form.email.value.trim(),
+        subject: form.subject.value.trim(),
+        body: form.message.value.trim(),
+      };
+      if (!isValidEmail(payload.email)) {
+        showError(alertBox, 'Please enter a valid email.');
+        return;
+      }
+      window.MinistryData.addMessage(payload);
+      showSuccess(alertBox, 'Message sent! We will reply soon.');
+      form.reset();
+    });
+  </script>
+</body>
+</html>
+

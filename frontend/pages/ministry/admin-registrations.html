@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Student Applications</title>
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/ministry.css">
+</head>
+<body>
+  <div class="ministry-shell">
+    <aside class="sidebar">
+      <a class="logo" href="../ministry-portal.html">Ministry Portal</a>
+      <div class="section-title">Admin</div>
+      <nav class="nav">
+        <a href="./admin-registrations.html" class="active">Applications</a>
+        <a href="./admin-workshops.html">Workshops</a>
+        <a href="./admin-announcements.html">Announcements</a>
+        <a href="./reports.html">Reports & Analytics</a>
+        <a href="./admin-messages.html">Messages</a>
+      </nav>
+      <div class="section-title">Public</div>
+      <nav class="nav">
+        <a href="./registrations.html">Student Registration</a>
+        <a href="./workshops.html">Workshops</a>
+        <a href="./announcements.html">Announcements</a>
+        <a href="./services.html">Citizen Services</a>
+        <a href="./contact.html">Contact & Support</a>
+      </nav>
+      <div class="footer">© 2025 Ministry of Employment</div>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div class="title">Admin · Student Applications</div>
+        <div class="actions">
+          <button id="dark-mode-toggle" class="btn btn-outline btn-sm" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+            <span id="dark-mode-icon">🌙</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="page-header">
+          <div>
+            <h1>Applications Queue</h1>
+            <p>Review, approve, or reject student employment interview applications.</p>
+          </div>
+          <div class="filter-bar">
+            <select id="status-filter" class="form-select">
+              <option value="all">All statuses</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+            <input id="search-input" class="form-input" placeholder="Search by name or university">
+          </div>
+        </div>
+
+        <div class="card">
+          <div id="applications-table"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/ministry-data.js"></script>
+  <script>
+    const tableEl = document.getElementById('applications-table');
+    const statusFilter = document.getElementById('status-filter');
+    const searchInput = document.getElementById('search-input');
+
+    function renderTable() {
+      const registrations = window.MinistryData.loadCollection(window.MinistryData.STORAGE_KEYS.registrations);
+      const status = statusFilter.value;
+      const term = searchInput.value.toLowerCase();
+
+      const rows = registrations
+        .filter(r => status === 'all' ? true : r.status === status)
+        .filter(r => r.full_name?.toLowerCase().includes(term) || r.university?.toLowerCase().includes(term))
+        .map(r => `
+          <tr>
+            <td>${r.full_name}</td>
+            <td>${r.university}</td>
+            <td>${r.major}</td>
+            <td>${r.gpa}</td>
+            <td>${r.email}</td>
+            <td>${r.phone}</td>
+            <td><span class="badge ${badgeClass(r.status)}">${r.status}</span></td>
+            <td>
+              <div style="display:flex; gap: var(--spacing-xs);">
+                <button class="btn btn-outline btn-sm" onclick="setStatus(${r.id}, 'approved')">Approve</button>
+                <button class="btn btn-outline btn-sm" onclick="setStatus(${r.id}, 'rejected')">Reject</button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+
+      tableEl.innerHTML = `
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Name</th><th>University</th><th>Major</th><th>GPA</th><th>Email</th><th>Phone</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows || '<tr><td colspan="8">No applications found.</td></tr>'}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function badgeClass(status) {
+      if (status === 'approved') return 'success';
+      if (status === 'rejected') return 'error';
+      return 'warning';
+    }
+
+    function setStatus(id, status) {
+      window.MinistryData.updateRegistrationStatus(id, status);
+      renderTable();
+    }
+
+    statusFilter.addEventListener('change', renderTable);
+    searchInput.addEventListener('input', renderTable);
+
+    document.addEventListener('DOMContentLoaded', renderTable);
+  </script>
+</body>
+</html>
+

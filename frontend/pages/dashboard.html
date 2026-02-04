@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - JoinWork</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <style>
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            color: var(--color-text-inverse);
+            padding: var(--spacing-2xl) 0;
+            margin-bottom: var(--spacing-2xl);
+            transition: background var(--transition-base);
+        }
+        .dashboard-header-content {
+            max-width: var(--container-max-width);
+            margin: 0 auto;
+            padding: 0 var(--spacing-lg);
+        }
+        .welcome-message {
+            font-size: var(--font-size-2xl);
+            margin-bottom: var(--spacing-sm);
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-2xl);
+        }
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+        }
+        .quick-link-card {
+            background: var(--color-surface);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            text-align: center;
+            text-decoration: none;
+            color: var(--color-text-primary);
+            transition: all var(--transition-base);
+        }
+        .quick-link-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+        .quick-link-card .icon {
+            font-size: var(--font-size-3xl);
+            margin-bottom: var(--spacing-sm);
+        }
+        .section-title {
+            font-size: var(--font-size-xl);
+            margin-bottom: var(--spacing-lg);
+            color: var(--color-text-primary);
+            transition: color var(--transition-base);
+        }
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-3xl);
+            color: var(--color-text-secondary);
+            transition: color var(--transition-base);
+        }
+    </style>
+</head>
+<body>
+    <!-- Dark Mode Toggle Button -->
+    <button id="dark-mode-toggle" class="btn btn-outline btn-sm" onclick="toggleDarkMode()" title="Toggle Dark Mode تبديل الوضع الداكن" style="position: fixed; top: 20px; right: 20px; z-index: 1000; background: var(--color-surface); border: 2px solid var(--color-primary);">
+        <span id="dark-mode-icon">🌙</span>
+    </button>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <a href="dashboard.html" class="header-logo">JoinWork</a>
+            <nav class="header-nav">
+                <a href="jobs.html">Jobs الوظائف</a>
+                <a href="workshops.html">Workshops ورش العمل</a>
+                <a href="profile.html">Profile الملف الشخصي</a>
+            </nav>
+            <div class="header-user">
+                <span id="user-name"></span>
+                <button class="btn btn-outline btn-sm" onclick="authAPI.logout()">Logout تسجيل الخروج</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="dashboard-header-content">
+            <h1 class="welcome-message" id="welcome-message">Welcome! مرحباً!</h1>
+            <p>Your personal dashboard for job opportunities and training<br>لوحة التحكم الشخصية لفرص العمل والتدريب</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container page-container">
+        <!-- Quick Links -->
+        <div class="quick-links">
+            <a href="jobs.html" class="quick-link-card">
+                <div class="icon">💼</div>
+                <h3>Browse Jobs تصفح الوظائف</h3>
+                <p>Find your dream job<br>ابحث عن وظيفة أحلامك</p>
+            </a>
+            <a href="workshops.html" class="quick-link-card">
+                <div class="icon">📚</div>
+                <h3>Workshops ورش العمل</h3>
+                <p>Enhance your skills<br>طور مهاراتك</p>
+            </a>
+            <a href="profile.html" class="quick-link-card">
+                <div class="icon">👤</div>
+                <h3>My Profile ملفي الشخصي</h3>
+                <p>View & edit your CV<br>عرض وتعديل سيرتك الذاتية</p>
+            </a>
+        </div>
+
+        <!-- Profile Card -->
+        <div class="card" id="profile-card">
+            <div class="card-header">
+                <h2 class="card-title">Your Profile ملفك الشخصي</h2>
+            </div>
+            <div class="card-body" id="profile-content">
+                <div class="empty-state">
+                    <p>Loading your profile... جاري تحميل ملفك الشخصي...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommended Jobs -->
+        <h2 class="section-title">Recommended Jobs الوظائف الموصى بها</h2>
+        <div class="grid grid-3" id="recommended-jobs">
+            <div class="empty-state">
+                <p>No jobs available at the moment. Check back later!<br>لا توجد وظائف متاحة حالياً. تحقق لاحقاً!</p>
+            </div>
+        </div>
+
+        <!-- Training Workshops -->
+        <h2 class="section-title">Upcoming Workshops ورش العمل القادمة</h2>
+        <div class="grid grid-3" id="upcoming-workshops">
+            <div class="empty-state">
+                <p>No workshops scheduled at the moment.<br>لا توجد ورش عمل مجدولة حالياً.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>JoinWork</h4>
+                    <p>Connecting graduates with opportunities<br>ربط الخريجين بالفرص</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links الروابط السريعة</h4>
+                    <a href="jobs.html">Jobs الوظائف</a>
+                    <a href="workshops.html">Workshops ورش العمل</a>
+                    <a href="profile.html">Profile الملف الشخصي</a>
+                </div>
+                <div class="footer-section">
+                    <h4>For Companies للشركات</h4>
+                    <a href="company-portal.html">Company Portal بوابة الشركة</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact الاتصال</h4>
+                    <p>Email: info@joinwork.iq</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 JoinWork. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        // Check authentication
+        if (!isAuthenticated()) {
+            window.location.href = 'login.html';
+        }
+
+        // Load user data
+        const userData = getCurrentUser();
+        if (userData) {
+            document.getElementById('user-name').textContent = userData.full_name || userData.email;
+            document.getElementById('welcome-message').textContent = `Welcome, ${userData.full_name || 'User'}!`;
+        }
+
+        // Load profile data
+        async function loadProfile() {
+            try {
+                const user = getCurrentUser();
+                if (user && user.role === 'graduate') {
+                    // Try to get graduate profile
+                    const profileContent = document.getElementById('profile-content');
+                    profileContent.innerHTML = `
+                        <div style="display: grid; gap: var(--spacing-md);">
+                            <div>
+                                <strong>Email:</strong> ${user.email}
+                            </div>
+                            <div>
+                                <strong>Role:</strong> ${user.role}
+                            </div>
+                            <div>
+                                <a href="profile.html" class="btn btn-primary">View Full Profile & CV عرض الملف الشخصي الكامل والسيرة الذاتية</a>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        // Load recommended jobs
+        async function loadJobs() {
+            try {
+                const response = await jobsAPI.getAll();
+                const jobsContainer = document.getElementById('recommended-jobs');
+                
+                if (response.jobs && response.jobs.length > 0) {
+                    jobsContainer.innerHTML = response.jobs.slice(0, 3).map(job => `
+                        <div class="card job-card">
+                            <div class="job-title">${job.title || 'Job Title'}</div>
+                            <div class="job-company">${job.company_name || 'Company'}</div>
+                            <div class="job-location">📍 ${job.location || 'Location not specified'}</div>
+                            ${job.salary ? `<div class="job-salary">💰 ${formatCurrency(job.salary)}</div>` : ''}
+                            <div style="margin-top: var(--spacing-md);">
+                                <a href="jobs.html?id=${job.job_id}" class="btn btn-primary btn-sm">View Details عرض التفاصيل</a>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    jobsContainer.innerHTML = `
+                        <div class="empty-state" style="grid-column: 1 / -1;">
+                            <p>No jobs available at the moment. Check back later!<br>لا توجد وظائف متاحة حالياً. تحقق لاحقاً!</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading jobs:', error);
+            }
+        }
+
+        // Load workshops
+        async function loadWorkshops() {
+            try {
+                const response = await workshopsAPI.getAll();
+                const workshopsContainer = document.getElementById('upcoming-workshops');
+                
+                if (response.workshops && response.workshops.length > 0) {
+                    workshopsContainer.innerHTML = response.workshops.slice(0, 3).map(workshop => `
+                        <div class="card">
+                            <div class="card-title">${workshop.title || 'Workshop'}</div>
+                            <div class="card-body">
+                                <p><strong>Category:</strong> ${workshop.category || 'N/A'}</p>
+                                <p><strong>Date:</strong> ${formatDateTime(workshop.date)}</p>
+                                ${workshop.trainer ? `<p><strong>Trainer:</strong> ${workshop.trainer}</p>` : ''}
+                            </div>
+                            <div class="card-footer">
+                                <a href="workshops.html?id=${workshop.workshop_id}" class="btn btn-secondary btn-sm">View Details عرض التفاصيل</a>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    workshopsContainer.innerHTML = `
+                        <div class="empty-state" style="grid-column: 1 / -1;">
+                            <p>No workshops scheduled at the moment.<br>لا توجد ورش عمل مجدولة حالياً.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading workshops:', error);
+            }
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initDarkMode();
+            loadProfile();
+            loadJobs();
+            loadWorkshops();
+        });
+    </script>
+</body>
+</html>
+

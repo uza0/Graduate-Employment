@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Viewer - JoinWork</title>
+    <link rel="stylesheet" href="../css/theme.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .database-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--spacing-xl);
+        }
+        .database-header {
+            background: var(--color-surface);
+            padding: var(--spacing-xl);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-xl);
+            box-shadow: var(--shadow-md);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-lg);
+        }
+        .stat-card {
+            background: var(--color-surface);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-md);
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--color-border);
+        }
+        .stat-number {
+            font-size: var(--font-size-3xl);
+            font-weight: bold;
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-xs);
+        }
+        .stat-label {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-sm);
+        }
+        .section-card {
+            background: var(--color-surface);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-xl);
+            box-shadow: var(--shadow-md);
+        }
+        .section-title {
+            font-size: var(--font-size-xl);
+            font-weight: bold;
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 2px solid var(--color-primary);
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: var(--spacing-md);
+        }
+        .data-table th {
+            background: var(--color-bg-tertiary);
+            padding: var(--spacing-sm) var(--spacing-md);
+            text-align: left;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            border-bottom: 2px solid var(--color-border);
+        }
+        .data-table td {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-bottom: 1px solid var(--color-border);
+            color: var(--color-text-primary);
+            font-size: var(--font-size-sm);
+        }
+        .data-table tr:hover {
+            background: var(--color-bg-primary);
+        }
+        .json-view {
+            background: var(--color-bg-tertiary);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-md);
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: var(--font-size-sm);
+            color: var(--color-text-primary);
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .refresh-btn {
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: var(--spacing-md);
+        }
+        .refresh-btn:hover {
+            background: var(--color-primary-hover);
+        }
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-xl);
+            color: var(--color-text-secondary);
+        }
+        .toggle-view {
+            background: var(--color-secondary);
+            color: white;
+            border: none;
+            padding: var(--spacing-xs) var(--spacing-md);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: var(--font-size-sm);
+            margin-left: var(--spacing-sm);
+        }
+        .toggle-view:hover {
+            background: var(--color-secondary-hover);
+        }
+        .view-toggle {
+            display: flex;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-logo">JoinWork</a>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="database-viewer.html" class="active">Database Viewer عارض قاعدة البيانات</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="database-container">
+        <div class="database-header">
+            <h1>📊 Database Viewer عارض قاعدة البيانات</h1>
+            <p style="color: var(--color-text-secondary); margin-top: var(--spacing-sm);">
+                View all data stored in the in-memory database (Development Only)<br>
+                عرض جميع البيانات المخزنة في قاعدة البيانات المؤقتة (للتطوير فقط)
+            </p>
+            <button class="refresh-btn" onclick="loadDatabase()">🔄 Refresh Data تحديث البيانات</button>
+        </div>
+
+        <!-- Statistics -->
+        <div id="stats-section" class="section-card" style="display: none;">
+            <h2 class="section-title">📈 Statistics الإحصائيات</h2>
+            <div class="stats-grid" id="stats-grid"></div>
+        </div>
+
+        <!-- Users Section -->
+        <div id="users-section" class="section-card" style="display: none;">
+            <div class="view-toggle">
+                <h2 class="section-title" style="margin: 0; border: none; padding: 0;">👥 Users المستخدمون</h2>
+                <button class="toggle-view" onclick="toggleView('users')">Toggle View تبديل العرض</button>
+            </div>
+            <div id="users-table-view"></div>
+            <div id="users-json-view" class="json-view" style="display: none;"></div>
+        </div>
+
+        <!-- Graduates Section -->
+        <div id="graduates-section" class="section-card" style="display: none;">
+            <div class="view-toggle">
+                <h2 class="section-title" style="margin: 0; border: none; padding: 0;">🎓 Graduates الخريجون</h2>
+                <button class="toggle-view" onclick="toggleView('graduates')">Toggle View تبديل العرض</button>
+            </div>
+            <div id="graduates-table-view"></div>
+            <div id="graduates-json-view" class="json-view" style="display: none;"></div>
+        </div>
+
+        <!-- Companies Section -->
+        <div id="companies-section" class="section-card" style="display: none;">
+            <div class="view-toggle">
+                <h2 class="section-title" style="margin: 0; border: none; padding: 0;">🏢 Companies الشركات</h2>
+                <button class="toggle-view" onclick="toggleView('companies')">Toggle View تبديل العرض</button>
+            </div>
+            <div id="companies-table-view"></div>
+            <div id="companies-json-view" class="json-view" style="display: none;"></div>
+        </div>
+
+        <!-- Jobs Section -->
+        <div id="jobs-section" class="section-card" style="display: none;">
+            <div class="view-toggle">
+                <h2 class="section-title" style="margin: 0; border: none; padding: 0;">💼 Jobs الوظائف</h2>
+                <button class="toggle-view" onclick="toggleView('jobs')">Toggle View تبديل العرض</button>
+            </div>
+            <div id="jobs-table-view"></div>
+            <div id="jobs-json-view" class="json-view" style="display: none;"></div>
+        </div>
+
+        <!-- Applications Section -->
+        <div id="applications-section" class="section-card" style="display: none;">
+            <div class="view-toggle">
+                <h2 class="section-title" style="margin: 0; border: none; padding: 0;">📝 Applications الطلبات</h2>
+                <button class="toggle-view" onclick="toggleView('applications')">Toggle View تبديل العرض</button>
+            </div>
+            <div id="applications-table-view"></div>
+            <div id="applications-json-view" class="json-view" style="display: none;"></div>
+        </div>
+
+        <!-- Workshops Section -->
+        <div id="workshops-section" class="section-card" style="display: none;">
+            <div class="view-toggle">
+                <h2 class="section-title" style="margin: 0; border: none; padding: 0;">🎯 Workshops ورش العمل</h2>
+                <button class="toggle-view" onclick="toggleView('workshops')">Toggle View تبديل العرض</button>
+            </div>
+            <div id="workshops-table-view"></div>
+            <div id="workshops-json-view" class="json-view" style="display: none;"></div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading" class="section-card">
+            <div class="empty-state">
+                <p>Loading database... جاري تحميل قاعدة البيانات...</p>
+            </div>
+        </div>
+
+        <!-- Error State -->
+        <div id="error" class="section-card" style="display: none;">
+            <div class="empty-state" style="color: var(--color-error);">
+                <p id="error-message"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        const viewModes = {
+            users: 'table',
+            graduates: 'table',
+            companies: 'table',
+            jobs: 'table',
+            applications: 'table',
+            workshops: 'table'
+        };
+
+        async function loadDatabase() {
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const errorMessage = document.getElementById('error-message');
+            
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            
+            // Hide all sections initially
+            document.querySelectorAll('.section-card').forEach(section => {
+                if (section.id !== 'loading' && section.id !== 'error') {
+                    section.style.display = 'none';
+                }
+            });
+
+            try {
+                const response = await fetch('http://localhost:3000/api/admin/database');
+                const result = await response.json();
+
+                if (result.error) {
+                    throw new Error(result.message || 'Failed to load database');
+                }
+
+                loading.style.display = 'none';
+                displayDatabase(result.data);
+            } catch (err) {
+                loading.style.display = 'none';
+                error.style.display = 'block';
+                errorMessage.textContent = `Error: ${err.message}. Make sure the backend server is running on http://localhost:3000`;
+            }
+        }
+
+        function displayDatabase(data) {
+            // Display statistics
+            displayStats(data.stats);
+            
+            // Display each section
+            displaySection('users', data.users, ['user_id', 'email', 'role', 'full_name']);
+            displaySection('graduates', data.graduates, ['graduate_id', 'user_id', 'full_name', 'email', 'university', 'major']);
+            displaySection('companies', data.companies, ['company_id', 'user_id', 'company_name', 'email', 'industry']);
+            displaySection('jobs', data.jobs, ['job_id', 'company_id', 'title', 'location', 'employment_type', 'status']);
+            displaySection('applications', data.applications, ['application_id', 'job_id', 'graduate_id', 'status', 'applied_at']);
+            displaySection('workshops', data.workshops, ['workshop_id', 'title', 'organizer', 'date', 'status']);
+        }
+
+        function displayStats(stats) {
+            const statsGrid = document.getElementById('stats-grid');
+            const statsSection = document.getElementById('stats-section');
+            
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${stats.total_users}</div>
+                    <div class="stat-label">Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.total_graduates}</div>
+                    <div class="stat-label">Graduates</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.total_companies}</div>
+                    <div class="stat-label">Companies</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.total_jobs}</div>
+                    <div class="stat-label">Jobs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.total_applications}</div>
+                    <div class="stat-label">Applications</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.total_workshops}</div>
+                    <div class="stat-label">Workshops</div>
+                </div>
+            `;
+            
+            statsSection.style.display = 'block';
+        }
+
+        function displaySection(sectionName, data, keyFields) {
+            const section = document.getElementById(`${sectionName}-section`);
+            const tableView = document.getElementById(`${sectionName}-table-view`);
+            const jsonView = document.getElementById(`${sectionName}-json-view`);
+
+            if (!data || data.length === 0) {
+                tableView.innerHTML = '<div class="empty-state">No data available</div>';
+                jsonView.textContent = '[]';
+                section.style.display = 'block';
+                return;
+            }
+
+            // Table view
+            let tableHTML = '<table class="data-table"><thead><tr>';
+            if (keyFields && keyFields.length > 0) {
+                keyFields.forEach(field => {
+                    tableHTML += `<th>${field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</th>`;
+                });
+            } else {
+                // Auto-detect fields from first item
+                const firstItem = data[0];
+                Object.keys(firstItem).forEach(key => {
+                    tableHTML += `<th>${key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</th>`;
+                });
+            }
+            tableHTML += '</tr></thead><tbody>';
+
+            data.forEach(item => {
+                tableHTML += '<tr>';
+                if (keyFields && keyFields.length > 0) {
+                    keyFields.forEach(field => {
+                        const value = item[field];
+                        tableHTML += `<td>${formatValue(value)}</td>`;
+                    });
+                } else {
+                    Object.values(item).forEach(value => {
+                        tableHTML += `<td>${formatValue(value)}</td>`;
+                    });
+                }
+                tableHTML += '</tr>';
+            });
+
+            tableHTML += '</tbody></table>';
+            tableView.innerHTML = tableHTML;
+
+            // JSON view
+            jsonView.textContent = JSON.stringify(data, null, 2);
+
+            section.style.display = 'block';
+        }
+
+        function formatValue(value) {
+            if (value === null || value === undefined) return '<em>null</em>';
+            if (typeof value === 'object') return JSON.stringify(value);
+            if (typeof value === 'boolean') return value ? '✓' : '✗';
+            return String(value);
+        }
+
+        function toggleView(sectionName) {
+            const mode = viewModes[sectionName];
+            const tableView = document.getElementById(`${sectionName}-table-view`);
+            const jsonView = document.getElementById(`${sectionName}-json-view`);
+            const button = event.target;
+
+            if (mode === 'table') {
+                tableView.style.display = 'none';
+                jsonView.style.display = 'block';
+                button.textContent = 'Table View';
+                viewModes[sectionName] = 'json';
+            } else {
+                tableView.style.display = 'block';
+                jsonView.style.display = 'none';
+                button.textContent = 'JSON View';
+                viewModes[sectionName] = 'table';
+            }
+        }
+
+        // Load database on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDatabase();
+        });
+    </script>
+</body>
+</html>
+

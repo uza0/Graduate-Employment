@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Messages</title>
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/ministry.css">
+</head>
+<body>
+  <div class="ministry-shell">
+    <aside class="sidebar">
+      <a class="logo" href="../ministry-portal.html">Ministry Portal</a>
+      <div class="section-title">Admin</div>
+      <nav class="nav">
+        <a href="./admin-registrations.html">Applications</a>
+        <a href="./admin-workshops.html">Workshops</a>
+        <a href="./admin-announcements.html">Announcements</a>
+        <a href="./reports.html">Reports & Analytics</a>
+        <a href="./admin-messages.html" class="active">Messages</a>
+      </nav>
+      <div class="section-title">Public</div>
+      <nav class="nav">
+        <a href="./registrations.html">Student Registration</a>
+        <a href="./workshops.html">Workshops</a>
+        <a href="./announcements.html">Announcements</a>
+        <a href="./services.html">Citizen Services</a>
+        <a href="./contact.html">Contact & Support</a>
+      </nav>
+      <div class="footer">© 2025 Ministry of Employment</div>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div class="title">Admin · Messages</div>
+        <div class="actions">
+          <button id="dark-mode-toggle" class="btn btn-outline btn-sm" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+            <span id="dark-mode-icon">🌙</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="page-header">
+          <div>
+            <h1>Inbox</h1>
+            <p>Reply to citizen inquiries and support requests.</p>
+          </div>
+          <select id="status-filter" class="form-select" style="max-width: 200px;">
+            <option value="all">All</option>
+            <option value="open">Open</option>
+            <option value="answered">Answered</option>
+          </select>
+        </div>
+
+        <div id="messages-list" class="list"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/ministry-data.js"></script>
+  <script>
+    const listEl = document.getElementById('messages-list');
+    const statusFilter = document.getElementById('status-filter');
+
+    function render() {
+      const messages = window.MinistryData.loadCollection(window.MinistryData.STORAGE_KEYS.messages);
+      const status = statusFilter.value;
+      const filtered = messages.filter(m => status === 'all' ? true : m.status === status);
+
+      listEl.innerHTML = filtered.map(m => `
+        <div class="list-item">
+          <div class="meta">${new Date(m.created_at).toLocaleString()} • ${m.email}</div>
+          <h3>${m.subject || 'No subject'}</h3>
+          <p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">${m.body}</p>
+          <div style="display:flex; gap: var(--spacing-sm); align-items:center; flex-wrap: wrap;">
+            <span class="badge ${m.status === 'answered' ? 'success' : 'warning'}">${m.status}</span>
+            <button class="btn btn-outline btn-sm" onclick="reply(${m.id})">Reply</button>
+          </div>
+          ${m.reply ? `<p class="meta" style="margin-top: var(--spacing-sm);">Reply: ${m.reply}</p>` : ''}
+        </div>
+      `).join('') || '<div class="empty-state">No messages.</div>';
+    }
+
+    function reply(id) {
+      const text = prompt('Enter reply text');
+      if (!text) return;
+      window.MinistryData.replyMessage(id, text);
+      render();
+    }
+
+    statusFilter.addEventListener('change', render);
+    document.addEventListener('DOMContentLoaded', render);
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Citizen Services - Ministry Portal</title>
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/ministry.css">
+</head>
+<body>
+  <div class="ministry-shell">
+    <aside class="sidebar">
+      <a class="logo" href="../ministry-portal.html">Ministry Portal</a>
+      <div class="section-title">Public</div>
+      <nav class="nav">
+        <a href="./registrations.html">Student Registration</a>
+        <a href="./workshops.html">Workshops</a>
+        <a href="./announcements.html">Announcements</a>
+        <a href="./services.html" class="active">Citizen Services</a>
+        <a href="./contact.html">Contact & Support</a>
+      </nav>
+      <div class="section-title">Admin</div>
+      <nav class="nav">
+        <a href="./admin-registrations.html">Applications (Admin)</a>
+        <a href="./admin-workshops.html">Workshops (Admin)</a>
+        <a href="./admin-announcements.html">Announcements (Admin)</a>
+        <a href="./reports.html">Reports & Analytics</a>
+        <a href="./admin-messages.html">Messages (Admin)</a>
+      </nav>
+      <div class="footer">© 2025 Ministry of Employment</div>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div class="title">Citizen Services</div>
+        <div class="actions">
+          <button id="dark-mode-toggle" class="btn btn-outline btn-sm" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+            <span id="dark-mode-icon">🌙</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="page-header">
+          <div>
+            <h1>Services & Procedures</h1>
+            <p>Find ministry services, requirements, and documents.</p>
+          </div>
+          <div class="filter-bar">
+            <input id="search" class="form-input" placeholder="Search services">
+            <select id="category" class="form-select">
+              <option value="all">All categories</option>
+              <option value="Verification">Verification</option>
+              <option value="Employment">Employment</option>
+              <option value="Training">Training</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="services-list" class="list"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/ministry-data.js"></script>
+  <script>
+    const listEl = document.getElementById('services-list');
+    const searchEl = document.getElementById('search');
+    const categoryEl = document.getElementById('category');
+
+    function render() {
+      const services = window.MinistryData.loadCollection(window.MinistryData.STORAGE_KEYS.services);
+      const term = searchEl.value.toLowerCase();
+      const category = categoryEl.value;
+
+      const filtered = services.filter(s =>
+        (category === 'all' ? true : s.category === category) &&
+        (s.name.toLowerCase().includes(term) || s.description.toLowerCase().includes(term))
+      );
+
+      listEl.innerHTML = filtered.map(s => `
+        <div class="list-item">
+          <div class="meta">${s.category}</div>
+          <h3>${s.name}</h3>
+          <p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">${s.description}</p>
+          <p class="meta">Required documents: ${s.documents?.join(', ') || '—'}</p>
+        </div>
+      `).join('') || '<div class="empty-state">No services found.</div>';
+    }
+
+    searchEl.addEventListener('input', render);
+    categoryEl.addEventListener('change', render);
+    document.addEventListener('DOMContentLoaded', render);
+  </script>
+</body>
+</html>
+

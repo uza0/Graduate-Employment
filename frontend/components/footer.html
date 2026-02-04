@@ -1,0 +1,47 @@
+<!-- JoinWork - Footer Component -->
+<!-- Include this in pages using: <div id="footer-placeholder"></div> -->
+
+<footer class="footer">
+  <div class="footer-container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h4>JoinWork</h4>
+        <p>Connecting graduates with opportunities<br>ربط الخريجين بالفرص</p>
+      </div>
+      <div class="footer-section">
+        <h4>Quick Links الروابط السريعة</h4>
+        <a href="/frontend/pages/jobs.html">Jobs الوظائف</a>
+        <a href="/frontend/pages/workshops.html">Workshops ورش العمل</a>
+        <a href="/frontend/pages/profile.html">Profile الملف الشخصي</a>
+      </div>
+      <div class="footer-section">
+        <h4>For Companies للشركات</h4>
+        <a href="/frontend/pages/company-portal.html">Company Portal بوابة الشركة</a>
+        <a href="/frontend/pages/company-portal.html#post-job">Post a Job نشر وظيفة</a>
+      </div>
+      <div class="footer-section">
+        <h4>Contact الاتصال</h4>
+        <p>Email: info@joinwork.iq</p>
+        <p>Phone: +964 XXX XXX XXXX</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 JoinWork. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Load footer into placeholder
+document.addEventListener('DOMContentLoaded', function() {
+  const placeholder = document.getElementById('footer-placeholder');
+  if (placeholder) {
+    fetch('/frontend/components/footer.html')
+      .then(response => response.text())
+      .catch(error => {
+        console.error('Error loading footer:', error);
+      });
+  }
+});
+</script>
+

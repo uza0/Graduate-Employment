@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - JoinWork</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <style>
+        .signup-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            padding: var(--spacing-lg);
+            transition: background var(--transition-base);
+        }
+        .signup-card {
+            background: var(--color-surface);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            padding: var(--spacing-3xl);
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transition: background-color var(--transition-base), box-shadow var(--transition-base);
+        }
+        .signup-header {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+        }
+        .signup-header h1 {
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+        .signup-header p {
+            color: var(--color-text-secondary);
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-md);
+        }
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        .role-selector {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            padding: var(--spacing-sm);
+            background: var(--color-bg-tertiary);
+            border-radius: var(--radius-md);
+        }
+        .role-option {
+            flex: 1;
+            padding: var(--spacing-sm) var(--spacing-md);
+            text-align: center;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            border: 2px solid transparent;
+        }
+        .role-option:hover {
+            background: var(--color-surface);
+        }
+        .role-option.active {
+            background: var(--color-primary);
+            color: var(--color-text-inverse);
+            border-color: var(--color-primary);
+        }
+        .role-option input[type="radio"] {
+            display: none;
+        }
+        .skills-input-hint {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-light);
+            margin-top: var(--spacing-xs);
+        }
+    </style>
+</head>
+<body>
+    <!-- Dark Mode Toggle Button -->
+    <button id="dark-mode-toggle" class="btn btn-outline btn-sm" onclick="toggleDarkMode()" title="Toggle Dark Mode تبديل الوضع الداكن" style="position: fixed; top: 20px; right: 20px; z-index: 1000; background: var(--color-surface); border: 2px solid var(--color-primary);">
+        <span id="dark-mode-icon">🌙</span>
+    </button>
+    
+    <div class="signup-container">
+        <div class="signup-card">
+            <div class="signup-header">
+                <h1>Create Account إنشاء حساب</h1>
+                <p>Join JoinWork and start your journey<br>انضم إلى JoinWork وابدأ رحلتك</p>
+            </div>
+
+            <div id="alert-container"></div>
+
+            <form id="signup-form">
+                <!-- Role Selection -->
+                <div class="form-group">
+                    <label class="form-label">I am a: أنا:</label>
+                    <div class="role-selector">
+                        <label class="role-option active" id="role-graduate">
+                            <input type="radio" name="role" value="graduate" checked>
+                            Graduate خريج
+                        </label>
+                        <label class="role-option" id="role-company">
+                            <input type="radio" name="role" value="company">
+                            Company شركة
+                        </label>
+                        <label class="role-option" id="role-ministry">
+                            <input type="radio" name="role" value="ministry">
+                            Ministry وزارة
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Common Fields -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="full_name" class="form-label">Full Name الاسم الكامل *</label>
+                        <input 
+                            type="text" 
+                            id="full_name" 
+                            name="full_name" 
+                            class="form-input" 
+                            placeholder="Enter your full name أدخل اسمك الكامل"
+                            required
+                        >
+                    </div>
+                    <div class="form-group" id="date-of-birth-group" style="display: block;">
+                        <label for="date_of_birth" class="form-label">Date of Birth تاريخ الميلاد *</label>
+                        <input 
+                            type="date" 
+                            id="date_of_birth" 
+                            name="date_of_birth" 
+                            class="form-input" 
+                            max="2006-12-31"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="form-group" id="gender-group" style="display: block;">
+                    <label class="form-label">Gender الجنس *</label>
+                    <div class="role-selector" style="margin-top: var(--spacing-xs);">
+                        <label class="role-option active" id="gender-male">
+                            <input type="radio" name="gender" value="male" checked>
+                            Male ذكر
+                        </label>
+                        <label class="role-option" id="gender-female">
+                            <input type="radio" name="gender" value="female">
+                            Female أنثى
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="form-label">Email البريد الإلكتروني *</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        class="form-input" 
+                        placeholder="your.email@example.com"
+                        required
+                        autocomplete="email"
+                    >
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password كلمة المرور *</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            class="form-input" 
+                            placeholder="Create a password إنشاء كلمة مرور"
+                            required
+                            autocomplete="new-password"
+                        >
+                        <span class="form-help">Minimum 8 characters with uppercase, lowercase, and number<br>الحد الأدنى 8 أحرف مع حروف كبيرة وصغيرة ورقم</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_password" class="form-label">Confirm Password تأكيد كلمة المرور *</label>
+                        <input 
+                            type="password" 
+                            id="confirm_password" 
+                            name="confirm_password" 
+                            class="form-input" 
+                            placeholder="Confirm your password أكد كلمة المرور"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <!-- Graduate Specific Fields -->
+                <div id="graduate-fields">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="university" class="form-label">University الجامعة *</label>
+                            <input 
+                                type="text" 
+                                id="university" 
+                                name="university" 
+                                class="form-input" 
+                                placeholder="University of Baghdad جامعة بغداد"
+                                required
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="major" class="form-label">Major التخصص *</label>
+                            <input 
+                                type="text" 
+                                id="major" 
+                                name="major" 
+                                class="form-input" 
+                                placeholder="Computer Science علوم الحاسوب"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="unified_card_number" class="form-label">Unified Card Number رقم البطاقة الموحدة *</label>
+                            <input 
+                                type="text" 
+                                id="unified_card_number" 
+                                name="unified_card_number" 
+                                class="form-input" 
+                                placeholder="200123420984"
+                                pattern="[0-9]{12}"
+                                minlength="12"
+                                maxlength="12"
+                                required
+                                inputmode="numeric"
+                                autocomplete="off"
+                            >
+                            <span class="skills-input-hint">12 رقم بالضبط — أول 4 أرقام = سنة الميلاد (مثال: 2001)<br>Exactly 12 digits — first 4 = birth year (e.g. 2001)</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="skills" class="form-label">Skills المهارات *</label>
+                            <input 
+                                type="text" 
+                                id="skills" 
+                                name="skills" 
+                                class="form-input" 
+                                placeholder="JavaScript, Python, React"
+                                required
+                            >
+                            <span class="skills-input-hint">Separate skills with commas<br>افصل المهارات بفواصل</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="projects" class="form-label">Projects المشاريع (Optional اختياري)</label>
+                        <textarea 
+                            id="projects" 
+                            name="projects" 
+                            class="form-textarea" 
+                            placeholder="Describe your projects... اشرح مشاريعك..."
+                            rows="3"
+                        ></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="experience" class="form-label">Experience الخبرة (Optional اختياري)</label>
+                        <textarea 
+                            id="experience" 
+                            name="experience" 
+                            class="form-textarea" 
+                            placeholder="Describe your work experience... اشرح خبرتك العملية..."
+                            rows="3"
+                        ></textarea>
+                    </div>
+                </div>
+
+                <!-- Company Specific Fields -->
+                <div id="company-fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="company_name" class="form-label">Company Name اسم الشركة *</label>
+                        <input 
+                            type="text" 
+                            id="company_name" 
+                            name="company_name" 
+                            class="form-input" 
+                            placeholder="Your Company Name اسم شركتك"
+                            required
+                        >
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="sector" class="form-label">Sector القطاع</label>
+                            <input 
+                                type="text" 
+                                id="sector" 
+                                name="sector" 
+                                class="form-input" 
+                                placeholder="Technology, Finance, etc. التكنولوجيا، المالية، إلخ"
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="location" class="form-label">Location الموقع</label>
+                            <input 
+                                type="text" 
+                                id="location" 
+                                name="location" 
+                                class="form-input" 
+                                placeholder="Baghdad, Iraq بغداد، العراق"
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ministry Fields (minimal for now) -->
+                <div id="ministry-fields" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">Ministry Account حساب الوزارة</label>
+                        <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">
+                            Ministry accounts require special verification. Please contact the administrator.<br>
+                            حسابات الوزارة تتطلب التحقق الخاص. يرجى الاتصال بالمسؤول.
+                        </p>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full btn-lg" id="submit-btn">
+                    Create Account إنشاء حساب
+                </button>
+            </form>
+
+            <div style="text-align: center; margin-top: var(--spacing-lg);">
+                <p style="color: var(--color-text-secondary);">
+                    Already have an account? لديك حساب بالفعل؟ 
+                    <a href="login.html" style="color: var(--color-primary); font-weight: var(--font-weight-medium);">
+                        Sign in تسجيل الدخول
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script>
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('[SIGNUP] ========================================');
+            console.log('[SIGNUP] Page loaded, initializing form...');
+            console.log('[SIGNUP] ========================================');
+            
+            // Check if form exists
+            const signupForm = document.getElementById('signup-form');
+            if (!signupForm) {
+                console.error('[SIGNUP ERROR] Form not found!');
+                alert('Error: Signup form not found. Please refresh the page.');
+                return;
+            }
+            
+            console.log('[SIGNUP] ✓ Form found');
+            
+            // Check if submit button exists
+            const submitBtnCheck = document.getElementById('submit-btn') || signupForm.querySelector('button[type="submit"]');
+            if (!submitBtnCheck) {
+                console.error('[SIGNUP ERROR] Submit button not found!');
+                alert('Error: Submit button not found. Please refresh the page.');
+                return;
+            }
+            
+            console.log('[SIGNUP] ✓ Submit button found');
+            console.log('[SIGNUP] Setting up event listeners...');
+            
+            // Role selector functionality
+            const roleOptions = document.querySelectorAll('.role-option');
+            const graduateFields = document.getElementById('graduate-fields');
+            const companyFields = document.getElementById('company-fields');
+            const ministryFields = document.getElementById('ministry-fields');
+            const dateOfBirthGroup = document.getElementById('date-of-birth-group');
+            const genderGroup = document.getElementById('gender-group');
+
+            roleOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const role = this.querySelector('input[type="radio"]').value;
+                    
+                    // Update active state
+                    roleOptions.forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
+                    this.querySelector('input[type="radio"]').checked = true;
+
+                    // Show/hide relevant fields
+                    if (role === 'graduate') {
+                        graduateFields.style.display = 'block';
+                        companyFields.style.display = 'none';
+                        ministryFields.style.display = 'none';
+                        dateOfBirthGroup.style.display = 'block';
+                        genderGroup.style.display = 'block';
+                        // Make graduate fields required
+                        document.getElementById('university').required = true;
+                        document.getElementById('major').required = true;
+                        document.getElementById('unified_card_number').required = true;
+                        document.getElementById('skills').required = true;
+                        document.getElementById('date_of_birth').required = true;
+                    } else if (role === 'company') {
+                        graduateFields.style.display = 'none';
+                        companyFields.style.display = 'block';
+                        ministryFields.style.display = 'none';
+                        dateOfBirthGroup.style.display = 'none';
+                        genderGroup.style.display = 'none';
+                        // Remove required from graduate fields
+                        document.getElementById('university').required = false;
+                        document.getElementById('major').required = false;
+                        document.getElementById('unified_card_number').required = false;
+                        document.getElementById('skills').required = false;
+                        // Remove required from date of birth field
+                        const dateOfBirthField = document.getElementById('date_of_birth');
+                        if (dateOfBirthField) {
+                            dateOfBirthField.required = false;
+                        }
+                        // Make company_name required
+                        const companyNameField = document.getElementById('company_name');
+                        if (companyNameField) {
+                            companyNameField.required = true;
+                        }
+                    } else if (role === 'ministry') {
+                        graduateFields.style.display = 'none';
+                        companyFields.style.display = 'none';
+                        ministryFields.style.display = 'block';
+                        dateOfBirthGroup.style.display = 'none';
+                        genderGroup.style.display = 'none';
+                        // Remove required from graduate fields
+                        document.getElementById('university').required = false;
+                        document.getElementById('major').required = false;
+                        document.getElementById('unified_card_number').required = false;
+                        document.getElementById('skills').required = false;
+                    }
+                });
+            });
+
+            // Gender selector functionality
+            const genderOptions = document.querySelectorAll('#gender-group .role-option');
+            genderOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    genderOptions.forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
+                    this.querySelector('input[type="radio"]').checked = true;
+                });
+            });
+
+            // Get submit button
+            const submitBtn = document.getElementById('submit-btn') || signupForm.querySelector('button[type="submit"]');
+            
+            if (!submitBtn) {
+                console.error('[SIGNUP ERROR] Submit button not found!');
+                alert('Error: Submit button not found. Please refresh the page.');
+                return;
+            }
+            
+            console.log('[SIGNUP] ✓ Submit button found:', submitBtn.id || 'button found');
+            
+            // Add a simple test click handler FIRST to verify clicks work
+            submitBtn.addEventListener('click', function(e) {
+                console.log('[SIGNUP TEST] ========================================');
+                console.log('[SIGNUP TEST] BUTTON CLICK DETECTED!');
+                console.log('[SIGNUP TEST] ========================================');
+            });
+            
+            // Add direct click handler to button (primary method)
+            submitBtn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('[SIGNUP] Submit button clicked - calling handleSignup');
+                await handleSignup(e);
+            });
+            
+            console.log('[SIGNUP] ✓ Click handler attached to submit button');
+            
+            // Also handle form submission event (backup)
+            signupForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                console.log('[SIGNUP] Form submit event triggered');
+                await handleSignup(e);
+            });
+            
+            console.log('[SIGNUP] ✓ Form submit handler attached');
+            
+            // Main signup handler function
+            async function handleSignup(e) {
+                console.log('[SIGNUP] === FORM SUBMISSION STARTED ===');
+                
+                const alertContainer = document.getElementById('alert-container');
+                if (!alertContainer) {
+                    console.error('[SIGNUP ERROR] Alert container not found!');
+                    alert('Form error: Alert container not found. Please refresh the page.');
+                    return;
+                }
+                alertContainer.innerHTML = '';
+
+                // Get form data - use signupForm instead of e.target
+                const formData = new FormData(signupForm);
+                const data = Object.fromEntries(formData.entries());
+                const role = data.role;
+                
+                console.log('[SIGNUP] Form data collected:', data);
+                console.log('[SIGNUP] Selected role:', role);
+                
+                // Check if role is selected
+                if (!role) {
+                    console.error('[SIGNUP ERROR] No role selected!');
+                    showError(alertContainer, 'Please select a role (Graduate, Company, or Ministry)');
+                    return;
+                }
+
+            // Validation
+            if (!data.full_name || !data.email || !data.password) {
+                console.log('Validation failed: Missing basic fields');
+                showError(alertContainer, 'Please fill in all required fields (Name, Email, Password)');
+                return;
+            }
+            
+            // Date of birth is only required for graduates
+            if (role === 'graduate' && (!data.date_of_birth || data.date_of_birth.trim() === '')) {
+                console.log('[SIGNUP] Validation failed: Missing date of birth for graduate');
+                showError(alertContainer, 'Please enter your date of birth\nيرجى إدخال تاريخ ميلادك');
+                return;
+            }
+            
+            // Gender is only required for graduates
+            if (role === 'graduate' && (!data.gender || data.gender.trim() === '')) {
+                console.log('[SIGNUP] Validation failed: Missing gender for graduate');
+                showError(alertContainer, 'Please select your gender\nيرجى اختيار جنسك');
+                return;
+            }
+            
+            console.log('Basic validation passed');
+
+            if (!isValidEmail(data.email)) {
+                showError(alertContainer, 'Please enter a valid email address');
+                return;
+            }
+
+            // Password validation
+            const passwordValidation = validatePassword(data.password);
+            if (!passwordValidation.isValid) {
+                showError(alertContainer, passwordValidation.message);
+                return;
+            }
+
+            if (data.password !== data.confirm_password) {
+                showError(alertContainer, 'Passwords do not match');
+                return;
+            }
+
+            // Role-specific validation
+            if (role === 'graduate') {
+                if (!data.university || !data.major || !data.unified_card_number || !data.skills) {
+                    console.log('Validation failed: Missing graduate fields');
+                    showError(alertContainer, 'Please fill in all graduate fields (including Unified Card Number)\nيرجى تعبئة جميع حقول الخريج بما فيها رقم البطاقة الموحدة');
+                    return;
+                }
+                var cardNum = (data.unified_card_number || '').trim().replace(/\s/g, '');
+                if (!/^[0-9]+$/.test(cardNum)) {
+                    showError(alertContainer, 'Unified Card Number must contain digits only\nرقم البطاقة الموحدة يجب أن يكون أرقاماً فقط');
+                    return;
+                }
+                if (cardNum.length !== 12) {
+                    showError(alertContainer, 'Unified Card Number must be exactly 12 digits\nرقم البطاقة الموحدة يجب أن يكون 12 رقماً بالضبط');
+                    return;
+                }
+                console.log('Graduate validation passed');
+            } else if (role === 'company') {
+                console.log('Validating company fields...');
+                console.log('Company name value:', data.company_name);
+                if (!data.company_name || data.company_name.trim() === '') {
+                    console.log('Validation failed: Missing company name');
+                    showError(alertContainer, 'Please enter your company name');
+                    return;
+                }
+                console.log('Company validation passed');
+            } else if (role === 'ministry') {
+                console.log('Ministry role - no additional validation needed');
+            }
+            
+            console.log('All validations passed, proceeding to API call...');
+
+                // Disable submit button
+                const submitBtn = document.getElementById('submit-btn') || signupForm.querySelector('button[type="submit"]');
+                if (!submitBtn) {
+                    console.error('[SIGNUP ERROR] Submit button not found!');
+                    showError(alertContainer, 'Form error. Please refresh the page and try again.');
+                    return;
+                }
+                const originalText = submitBtn.textContent;
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Creating account...';
+
+            try {
+                // Prepare signup data
+                const signupData = {
+                    full_name: data.full_name,
+                    email: data.email,
+                    password: data.password,
+                    role: role
+                };
+
+                // Add role-specific data
+                if (role === 'graduate') {
+                    signupData.university = data.university;
+                    signupData.major = data.major;
+                    signupData.unified_card_number = (data.unified_card_number || '').trim().replace(/\s/g, '');
+                    signupData.skills = data.skills;
+                    signupData.date_of_birth = data.date_of_birth;
+                    signupData.gender = data.gender;
+                    // Calculate age from date of birth
+                    if (data.date_of_birth) {
+                        const birthDate = new Date(data.date_of_birth);
+                        const today = new Date();
+                        let age = today.getFullYear() - birthDate.getFullYear();
+                        const monthDiff = today.getMonth() - birthDate.getMonth();
+                        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                            age--;
+                        }
+                        signupData.age = age;
+                    }
+                    if (data.projects) signupData.projects = data.projects;
+                    if (data.experience) signupData.experience = data.experience;
+                } else if (role === 'company') {
+                    // Company name is required
+                    if (!data.company_name || data.company_name.trim() === '') {
+                        showError(alertContainer, 'Company name is required');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText;
+                        return;
+                    }
+                    signupData.company_name = data.company_name.trim();
+                    if (data.sector) signupData.sector = data.sector.trim();
+                    if (data.location) signupData.location = data.location.trim();
+                }
+
+                // Debug: Log the data being sent
+                console.log('[SIGNUP] Sending signup request with data:', signupData);
+                console.log('[SIGNUP] Calling authAPI.signup...');
+                
+                // Call signup API
+                const response = await authAPI.signup(signupData);
+                
+                console.log('[SIGNUP] Signup successful! Response:', response);
+                
+                // Store token and user data
+                localStorage.setItem('authToken', response.token);
+                localStorage.setItem('userData', JSON.stringify(response.user));
+
+                // Show success message
+                showSuccess(alertContainer, 'Account created successfully! Redirecting...');
+
+                // Redirect based on role
+                setTimeout(() => {
+                    if (role === 'graduate') {
+                        window.location.href = 'dashboard.html';
+                    } else if (role === 'company') {
+                        window.location.href = 'company-portal.html';
+                    } else if (role === 'ministry') {
+                        window.location.href = 'ministry-portal.html';
+                    } else {
+                        window.location.href = 'dashboard.html';
+                    }
+                }, 1500);
+
+            } catch (error) {
+                // Show error message with more details
+                console.error('=== SIGNUP ERROR ===');
+                console.error('Error object:', error);
+                console.error('Error message:', error.message);
+                console.error('Error stack:', error.stack);
+                
+                let errorMessage = 'Failed to create account. Please try again.';
+                if (error.message) {
+                    errorMessage = error.message;
+                } else if (error.response && error.response.message) {
+                    errorMessage = error.response.message;
+                }
+                
+                showError(alertContainer, errorMessage);
+                
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+            }
+            
+            console.log('[SIGNUP] Form event listeners attached successfully');
+        });
+
+        // Real-time password validation
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const validation = validatePassword(password);
+            const helpText = this.parentElement.querySelector('.form-help');
+            
+            if (password.length > 0 && !validation.isValid) {
+                if (helpText) {
+                    helpText.style.color = 'var(--color-error)';
+                    helpText.textContent = validation.message;
+                }
+            } else if (password.length > 0 && validation.isValid) {
+                if (helpText) {
+                    helpText.style.color = 'var(--color-success)';
+                    helpText.textContent = 'Password is strong ✓';
+                }
+            } else {
+                if (helpText) {
+                    helpText.style.color = 'var(--color-text-light)';
+                    helpText.textContent = 'Minimum 8 characters with uppercase, lowercase, and number';
+                }
+            }
+        });
+        
+        // Initialize dark mode
+        document.addEventListener('DOMContentLoaded', function() {
+            initDarkMode();
+        });
+    </script>
+</body>
+</html>
+

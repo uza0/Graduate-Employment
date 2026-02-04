@@ -1,0 +1,10 @@
+/**
+ * JoinWork - Main Stylesheet
+ * Imports theme and components, adds global styles
+ */
+
+@import url('./theme.css');
+@import url('./components.css');
+
+/* Additional global styles can be added here */
+

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JoinWork - Graduate Employment & Training System</title>
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            text-align: center;
+            color: var(--color-text-inverse);
+            padding: var(--spacing-xl);
+            transition: background var(--transition-base);
+        }
+        .hero-content h1 {
+            font-size: var(--font-size-4xl);
+            margin-bottom: var(--spacing-lg);
+            color: var(--color-text-white);
+        }
+        .hero-content p {
+            font-size: var(--font-size-xl);
+            margin-bottom: var(--spacing-2xl);
+            color: rgba(255, 255, 255, 0.9);
+        }
+        .hero-buttons {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-hero {
+            padding: var(--spacing-md) var(--spacing-2xl);
+            font-size: var(--font-size-lg);
+        }
+    </style>
+</head>
+<body>
+    <!-- Dark Mode Toggle Button -->
+    <button id="dark-mode-toggle" class="btn btn-outline btn-sm" onclick="toggleDarkMode()" title="Toggle Dark Mode" style="position: fixed; top: 20px; right: 20px; z-index: 1000; background: rgba(255, 255, 255, 0.9);">
+        <span id="dark-mode-icon">🌙</span>
+    </button>
+    
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1>JoinWork</h1>
+            <p>Connecting Iraqi Graduates with Job Opportunities and Training Programs<br>ربط الخريجين العراقيين بفرص العمل وبرامج التدريب</p>
+            <div class="hero-buttons">
+                <a href="pages/login.html" class="btn btn-hero" style="background: var(--color-surface); color: var(--color-primary);">
+                    Sign In تسجيل الدخول
+                </a>
+                <a href="pages/signup.html" class="btn btn-hero" style="background: transparent; border: 2px solid var(--color-text-inverse); color: var(--color-text-inverse);">
+                    Create Account إنشاء حساب
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/utils.js"></script>
+    <script>
+        // Initialize dark mode
+        document.addEventListener('DOMContentLoaded', function() {
+            initDarkMode();
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Portal - JoinWork</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <style>
+        .portal-header {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            color: var(--color-text-inverse);
+            padding: var(--spacing-2xl) 0;
+            margin-bottom: var(--spacing-2xl);
+            transition: background var(--transition-base);
+        }
+        .portal-tabs {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+            border-bottom: 2px solid var(--color-border);
+            transition: border-color var(--transition-base);
+        }
+        .tab-button {
+            padding: var(--spacing-md) var(--spacing-lg);
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: var(--font-size-base);
+            color: var(--color-text-secondary);
+            transition: all var(--transition-base);
+        }
+        .tab-button:hover {
+            color: var(--color-primary);
+        }
+        .tab-button.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+            font-weight: var(--font-weight-semibold);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+        .stat-card {
+            background: var(--color-surface);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            text-align: center;
+            transition: background-color var(--transition-base);
+        }
+        .stat-number {
+            font-size: var(--font-size-3xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-xs);
+        }
+        .stat-label {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-sm);
+        }
+    </style>
+</head>
+<body>
+    <!-- Dark Mode Toggle Button -->
+    <button id="dark-mode-toggle" class="btn btn-outline btn-sm" onclick="toggleDarkMode()" title="Toggle Dark Mode تبديل الوضع الداكن" style="position: fixed; top: 20px; right: 20px; z-index: 1000; background: var(--color-surface); border: 2px solid var(--color-primary);">
+        <span id="dark-mode-icon">🌙</span>
+    </button>
+
+    <header class="header">
+        <div class="header-container">
+            <a href="company-portal.html" class="header-logo">JoinWork</a>
+            <nav class="header-nav">
+                <a href="company-portal.html">Company Portal بوابة الشركة</a>
+                <a href="jobs.html">Browse Jobs تصفح الوظائف</a>
+            </nav>
+            <div class="header-user">
+                <span id="user-name"></span>
+                <button class="btn btn-outline btn-sm" onclick="authAPI.logout()">Logout تسجيل الخروج</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="portal-header">
+        <div class="container">
+            <h1>Company Portal بوابة الشركة</h1>
+            <p>Manage your job postings and find talented graduates<br>إدارة إعلانات الوظائف والعثور على الخريجين الموهوبين</p>
+        </div>
+    </div>
+
+    <div class="container page-container">
+        <!-- Tabs -->
+        <div class="portal-tabs">
+            <button class="tab-button active" onclick="switchTab('dashboard', event)">Dashboard لوحة التحكم</button>
+            <button class="tab-button" onclick="switchTab('post-job', event)">Post a Job نشر وظيفة</button>
+            <button class="tab-button" onclick="switchTab('my-jobs', event)">My Jobs وظائفي</button>
+            <button class="tab-button" onclick="switchTab('applications', event)">Applications الطلبات</button>
+            <button class="tab-button" onclick="switchTab('search-graduates', event)">Search Graduates البحث عن الخريجين</button>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard-tab" class="tab-content active">
+            <h2 style="margin-bottom: var(--spacing-lg);">Company Dashboard لوحة تحكم الشركة</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-jobs-stat">0</div>
+                    <div class="stat-label">Total Jobs Posted إجمالي الوظائف المنشورة</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="active-jobs-stat">0</div>
+                    <div class="stat-label">Active Jobs الوظائف النشطة</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-applications-stat">0</div>
+                    <div class="stat-label">Total Applications إجمالي الطلبات</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="pending-applications-stat">0</div>
+                    <div class="stat-label">Pending Reviews الطلبات المعلقة</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Recent Applications الطلبات الأخيرة</h3>
+                </div>
+                <div class="card-body" id="recent-applications">
+                    <div class="empty-state">
+                        <p>No applications yet. Post a job to start receiving applications!<br>لا توجد طلبات بعد. انشر وظيفة لبدء استقبال الطلبات!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Post Job Tab -->
+        <div id="post-job-tab" class="tab-content">
+            <h2 style="margin-bottom: var(--spacing-lg);">Post a New Job نشر وظيفة جديدة</h2>
+            
+            <div class="card">
+                <form id="post-job-form">
+                    <div class="form-group">
+                        <label for="job-title" class="form-label">Job Title المسمى الوظيفي *</label>
+                        <input type="text" id="job-title" name="title" class="form-input" placeholder="e.g., Software Developer مثل: مطور برمجيات" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="job-description" class="form-label">Job Description وصف الوظيفة *</label>
+                        <textarea id="job-description" name="description" class="form-textarea" rows="6" placeholder="Describe the job responsibilities, requirements, and benefits... اشرح مسؤوليات الوظيفة والمتطلبات والفوائد..." required></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="job-salary" class="form-label">Salary (IQD) الراتب (دينار عراقي)</label>
+                            <input type="number" id="job-salary" name="salary" class="form-input" placeholder="500000" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="job-location" class="form-label">Location الموقع *</label>
+                            <input type="text" id="job-location" name="location" class="form-input" placeholder="Baghdad, Iraq بغداد، العراق" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="job-type" class="form-label">Employment Type نوع التوظيف *</label>
+                            <select id="job-type" name="employment_type" class="form-select" required>
+                                <option value="full-time">Full Time دوام كامل</option>
+                                <option value="part-time">Part Time دوام جزئي</option>
+                                <option value="contract">Contract عقد</option>
+                                <option value="internship">Internship تدريب</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="job-skills" class="form-label">Required Skills المهارات المطلوبة *</label>
+                            <input type="text" id="job-skills" name="skills_required" class="form-input" placeholder="JavaScript, Python, React" required>
+                            <span class="form-help">Separate skills with commas<br>افصل المهارات بفواصل</span>
+                        </div>
+                    </div>
+
+                    <div id="post-job-alert"></div>
+
+                    <button type="submit" class="btn btn-primary btn-full btn-lg">Post Job نشر الوظيفة</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- My Jobs Tab -->
+        <div id="my-jobs-tab" class="tab-content">
+            <h2 style="margin-bottom: var(--spacing-lg);">My Job Postings إعلانات وظائفي</h2>
+            <div id="my-jobs-container">
+                <div class="empty-state">
+                    <p>Loading your jobs... جاري تحميل وظائفك...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Applications Tab -->
+        <div id="applications-tab" class="tab-content">
+            <h2 style="margin-bottom: var(--spacing-lg);">Job Applications طلبات الوظائف</h2>
+            <div id="applications-container">
+                <div class="empty-state">
+                    <p>Select a job to view applications<br>اختر وظيفة لعرض الطلبات</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Graduates Tab -->
+        <div id="search-graduates-tab" class="tab-content">
+            <h2 style="margin-bottom: var(--spacing-lg);">Search Graduates البحث عن الخريجين</h2>
+            
+            <div class="card" style="margin-bottom: var(--spacing-xl);">
+                <h3 style="margin-bottom: var(--spacing-md);">Search Filters مرشحات البحث</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="search-major" class="form-label">Major التخصص</label>
+                        <input type="text" id="search-major" class="form-input" placeholder="Computer Science علوم الحاسوب">
+                    </div>
+                    <div class="form-group">
+                        <label for="search-skills" class="form-label">Skills المهارات</label>
+                        <input type="text" id="search-skills" class="form-input" placeholder="JavaScript, Python">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="search-min-gpa" class="form-label">Minimum GPA الحد الأدنى للمعدل</label>
+                        <input type="number" id="search-min-gpa" class="form-input" placeholder="3.0" step="0.1" min="0" max="4.0">
+                    </div>
+                    <div class="form-group">
+                        <label for="search-university" class="form-label">University الجامعة</label>
+                        <input type="text" id="search-university" class="form-input" placeholder="University of Baghdad جامعة بغداد">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="searchGraduates()">Search Graduates البحث عن الخريجين</button>
+            </div>
+
+            <div id="graduates-results">
+                <div class="empty-state">
+                    <p>Use the filters above to search for graduates<br>استخدم المرشحات أعلاه للبحث عن الخريجين</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>JoinWork</h4>
+                    <p>Connecting graduates with opportunities</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 JoinWork. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        let currentCompanyId = null;
+        let currentJobIdForApplications = null;
+
+        // Check authentication
+        if (!isAuthenticated()) {
+            window.location.href = 'login.html';
+        }
+
+        // Load user data
+        const userData = getCurrentUser();
+        if (userData) {
+            document.getElementById('user-name').textContent = userData.full_name || userData.email;
+            
+            // Check if user is a company
+            if (userData.role !== 'company') {
+                alert('This page is for companies only.');
+                window.location.href = 'dashboard.html';
+            }
+        }
+
+        // Load company profile
+        async function loadCompanyProfile() {
+            try {
+                const user = getCurrentUser();
+                if (!user || !user.user_id) {
+                    console.error('No user found');
+                    return;
+                }
+                // Get company ID from user
+                const response = await companiesAPI.getProfileByUser(user.user_id);
+                if (response && response.company_id) {
+                    currentCompanyId = response.company_id;
+                    console.log('Company profile loaded, company_id:', currentCompanyId);
+                } else {
+                    console.warn('Company profile response missing company_id');
+                }
+            } catch (error) {
+                console.error('Error loading company profile:', error);
+                // If company profile doesn't exist, we'll still allow job posting
+                // The backend will create it if needed
+            }
+        }
+
+        // Switch tabs
+        window.switchTab = function(tabName, eventElement) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            const tabElement = document.getElementById(`${tabName}-tab`);
+            if (tabElement) {
+                tabElement.classList.add('active');
+            }
+
+            // Activate the button that was clicked (if eventElement is provided)
+            if (eventElement && eventElement.target) {
+                eventElement.target.classList.add('active');
+            } else {
+                // Find the button by its onclick attribute and activate it
+                const buttons = document.querySelectorAll('.tab-button');
+                buttons.forEach(btn => {
+                    if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(`'${tabName}'`)) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+
+            // Load tab content
+            if (tabName === 'dashboard') {
+                loadDashboard();
+            } else if (tabName === 'my-jobs') {
+                // Ensure company profile is loaded before loading jobs
+                if (!currentCompanyId) {
+                    loadCompanyProfile().then(() => {
+                        loadMyJobs();
+                    });
+                } else {
+                    loadMyJobs();
+                }
+            } else if (tabName === 'applications') {
+                loadApplications();
+            }
+        }
+
+        // Load dashboard
+        async function loadDashboard() {
+            try {
+                const myJobs = await companiesAPI.getJobs(currentCompanyId || 1);
+                const totalJobs = myJobs.jobs ? myJobs.jobs.length : 0;
+                const activeJobs = myJobs.jobs ? myJobs.jobs.filter(j => j.status === 'active').length : 0;
+                
+                document.getElementById('total-jobs-stat').textContent = totalJobs;
+                document.getElementById('active-jobs-stat').textContent = activeJobs;
+                
+                // Load recent applications
+                loadRecentApplications();
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        // Load recent applications
+        async function loadRecentApplications() {
+            // This will be implemented when we have applications
+            document.getElementById('recent-applications').innerHTML = `
+                <div class="empty-state">
+                    <p>No applications yet. Post a job to start receiving applications!</p>
+                </div>
+            `;
+        }
+
+        // Post job form handler
+        document.getElementById('post-job-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const alertContainer = document.getElementById('post-job-alert');
+            alertContainer.innerHTML = '';
+
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            // Validation
+            if (!data.title || !data.description || !data.location || !data.skills_required) {
+                showError(alertContainer, 'Please fill in all required fields');
+                return;
+            }
+
+            try {
+                const jobData = {
+                    title: data.title,
+                    description: data.description,
+                    location: data.location,
+                    skills_required: data.skills_required,
+                    employment_type: data.employment_type || 'full-time',
+                    salary: data.salary ? parseFloat(data.salary) : null
+                };
+
+                const response = await jobsAPI.create(jobData);
+                showSuccess(alertContainer, 'Job posted successfully!');
+                
+                // Reset form
+                e.target.reset();
+                
+                // Reload company profile to get updated company_id
+                await loadCompanyProfile();
+                
+                // Switch to My Jobs tab
+                setTimeout(() => {
+                    switchTab('my-jobs');
+                }, 1500);
+
+            } catch (error) {
+                showError(alertContainer, error.message || 'Failed to post job. Please try again.');
+                console.error('Post job error:', error);
+            }
+        });
+
+        // Load my jobs
+        async function loadMyJobs() {
+            try {
+                const response = await companiesAPI.getJobs(currentCompanyId || 1);
+                const container = document.getElementById('my-jobs-container');
+                
+                if (!response.jobs || response.jobs.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <p>You haven't posted any jobs yet. <a href="#" onclick="switchTab('post-job', null); return false;">Post your first job</a>!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = response.jobs.map(job => `
+                    <div class="card job-card" style="margin-bottom: var(--spacing-lg);">
+                        <div class="job-title">${job.title || 'Job Title'}</div>
+                        <div class="job-location">📍 ${job.location || 'Location not specified'}</div>
+                        ${job.salary ? `<div class="job-salary">💰 ${formatCurrency(job.salary)}</div>` : ''}
+                        <div style="margin-top: var(--spacing-md);">
+                            <span class="skill-tag">${job.employment_type || 'full-time'}</span>
+                            <span class="skill-tag" style="background: ${job.status === 'active' ? 'var(--color-success)' : 'var(--color-text-light)'}; color: white;">
+                                ${job.status || 'active'}
+                            </span>
+                        </div>
+                        <div style="margin-top: var(--spacing-md); display: flex; gap: var(--spacing-sm);">
+                            <button class="btn btn-primary btn-sm" onclick="viewJobApplications(${job.job_id})">View Applications عرض الطلبات</button>
+                            <button class="btn btn-outline btn-sm" onclick="editJob(${job.job_id})">Edit تعديل</button>
+                            <button class="btn btn-outline btn-sm" onclick="deleteJob(${job.job_id})" style="color: var(--color-error);">Delete حذف</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading jobs:', error);
+                document.getElementById('my-jobs-container').innerHTML = `
+                    <div class="alert alert-error">
+                        <strong>Error:</strong> Failed to load jobs.
+                    </div>
+                `;
+            }
+        }
+
+        // Load applications
+        async function loadApplications() {
+            document.getElementById('applications-container').innerHTML = `
+                <div class="empty-state">
+                    <p>Select a job from "My Jobs" tab to view applications<br>اختر وظيفة من تبويب "وظائفي" لعرض الطلبات</p>
+                </div>
+            `;
+        }
+
+        // Make functions globally accessible
+        window.viewJobApplications = async function(jobId) {
+            try {
+                currentJobIdForApplications = jobId; // Store current job ID
+                console.log('[COMPANY] Loading applications for job:', jobId);
+                const applications = await jobsAPI.getApplications(jobId);
+                console.log('[COMPANY] Applications received:', applications);
+                
+                // Switch to applications tab
+                switchTab('applications');
+                
+                const container = document.getElementById('applications-container');
+                if (!container) {
+                    console.error('[COMPANY] Applications container not found');
+                    return;
+                }
+                
+                if (!applications || !applications.applications || applications.applications.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <p>No applications for this job yet.<br>لا توجد طلبات لهذه الوظيفة بعد.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Get job title for display
+                let jobTitle = `Job #${jobId}`;
+                try {
+                    const job = await jobsAPI.getById(jobId);
+                    if (job && job.title) {
+                        jobTitle = job.title;
+                    }
+                } catch (jobError) {
+                    console.log('[COMPANY] Could not fetch job title:', jobError);
+                }
+                
+                // Escape HTML helper
+                const escapeHTML = (text) => {
+                    if (!text) return '';
+                    const div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
+                };
+                
+                container.innerHTML = `
+                    <div style="margin-bottom: var(--spacing-lg);">
+                        <h3>Applications for: ${escapeHTML(jobTitle)}</h3>
+                        <p style="color: var(--color-text-secondary);">Total Applications: ${applications.applications.length}</p>
+                    </div>
+                    ${applications.applications.map(app => `
+                        <div class="card" style="margin-bottom: var(--spacing-md); border-left: 4px solid ${app.status === 'accepted' ? 'var(--color-success)' : app.status === 'rejected' ? 'var(--color-error)' : 'var(--color-primary)'};">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--spacing-md);">
+                                <div>
+                                    <h4 style="margin: 0 0 var(--spacing-xs) 0;">${escapeHTML(app.graduate_name || 'Applicant')}</h4>
+                                    <p style="margin: 0; color: var(--color-text-secondary); font-size: var(--font-size-sm);">${escapeHTML(app.graduate_email || 'N/A')}</p>
+                                </div>
+                                <span class="skill-tag" style="background: ${app.status === 'accepted' ? 'var(--color-success)' : app.status === 'rejected' ? 'var(--color-error)' : 'var(--color-warning)'}; color: white; text-transform: capitalize;">
+                                    ${escapeHTML(app.status || 'pending')}
+                                </span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-sm); margin-bottom: var(--spacing-md);">
+                                <div>
+                                    <strong style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">Major:</strong>
+                                    <p style="margin: var(--spacing-xs) 0 0 0;">${escapeHTML(app.graduate_major || 'N/A')}</p>
+                                </div>
+                                <div>
+                                    <strong style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">University:</strong>
+                                    <p style="margin: var(--spacing-xs) 0 0 0;">${escapeHTML(app.graduate_university || 'N/A')}</p>
+                                </div>
+                                ${app.graduate_gpa ? `
+                                <div>
+                                    <strong style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">GPA:</strong>
+                                    <p style="margin: var(--spacing-xs) 0 0 0;">${app.graduate_gpa.toFixed(2)}</p>
+                                </div>
+                                ` : ''}
+                                <div>
+                                    <strong style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">Applied:</strong>
+                                    <p style="margin: var(--spacing-xs) 0 0 0;">${app.applied_date ? formatDate(app.applied_date) : 'N/A'}</p>
+                                </div>
+                            </div>
+                            ${app.graduate_skills ? `
+                            <div style="margin-bottom: var(--spacing-md);">
+                                <strong style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">Skills:</strong>
+                                <div style="display: flex; flex-wrap: wrap; gap: var(--spacing-xs); margin-top: var(--spacing-xs);">
+                                    ${parseSkills(app.graduate_skills).map(skill => `<span class="skill-tag">${escapeHTML(skill)}</span>`).join('')}
+                                </div>
+                            </div>
+                            ` : ''}
+                            ${app.cover_letter ? `<div style="margin-top: var(--spacing-sm);"><strong>Cover Letter:</strong><p style="margin-top: var(--spacing-xs);">${escapeHTML(app.cover_letter)}</p></div>` : ''}
+                            <div style="margin-top: var(--spacing-md);">
+                                <button class="btn btn-primary btn-sm" onclick="viewApplicantProfile(${app.graduate_id})">View Full Profile عرض الملف الكامل</button>
+                                ${app.status === 'pending' ? `
+                                    <button class="btn btn-secondary btn-sm" onclick="updateApplicationStatus(${app.application_id}, 'accepted')">Accept قبول</button>
+                                    <button class="btn btn-outline btn-sm" onclick="updateApplicationStatus(${app.application_id}, 'rejected')">Reject رفض</button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                `;
+            } catch (error) {
+                console.error('[COMPANY] Error loading applications:', error);
+                const errorMessage = error && error.message ? error.message : (error && error.toString ? error.toString() : 'Unknown error');
+                alert('Failed to load applications: ' + errorMessage + '\nفشل تحميل الطلبات: ' + errorMessage);
+                
+                // Show error in container
+                const container = document.getElementById('applications-container');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="alert alert-error">
+                            <strong>Error:</strong> Failed to load applications. ${errorMessage}<br>
+                            <strong>خطأ:</strong> فشل تحميل الطلبات. ${errorMessage}
+                        </div>
+                        <div style="margin-top: var(--spacing-md);">
+                            <button class="btn btn-primary" onclick="viewJobApplications(${jobId})">Retry إعادة المحاولة</button>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Edit job
+        window.editJob = async function(jobId) {
+            try {
+                // Get job details
+                const job = await jobsAPI.getById(jobId);
+                
+                // Create edit modal
+                const modal = document.createElement('div');
+                modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: var(--spacing-lg);';
+                modal.innerHTML = `
+                    <div class="card" style="max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto;">
+                        <div class="card-header">
+                            <h3 class="card-title">Edit Job تعديل الوظيفة</h3>
+                            <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer; float: right;">&times;</button>
+                        </div>
+                        <div class="card-body">
+                            <form id="edit-job-form">
+                                <div class="form-group">
+                                    <label for="edit-job-title" class="form-label">Job Title المسمى الوظيفي *</label>
+                                    <input type="text" id="edit-job-title" name="title" class="form-input" value="${job.title || ''}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-job-description" class="form-label">Job Description وصف الوظيفة *</label>
+                                    <textarea id="edit-job-description" name="description" class="form-textarea" rows="6" required>${job.description || ''}</textarea>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="edit-job-salary" class="form-label">Salary (IQD) الراتب (دينار عراقي)</label>
+                                        <input type="number" id="edit-job-salary" name="salary" class="form-input" value="${job.salary || ''}" min="0">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="edit-job-location" class="form-label">Location الموقع *</label>
+                                        <input type="text" id="edit-job-location" name="location" class="form-input" value="${job.location || ''}" required>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="edit-job-type" class="form-label">Employment Type نوع التوظيف *</label>
+                                        <select id="edit-job-type" name="employment_type" class="form-select" required>
+                                            <option value="full-time" ${job.employment_type === 'full-time' ? 'selected' : ''}>Full Time دوام كامل</option>
+                                            <option value="part-time" ${job.employment_type === 'part-time' ? 'selected' : ''}>Part Time دوام جزئي</option>
+                                            <option value="contract" ${job.employment_type === 'contract' ? 'selected' : ''}>Contract عقد</option>
+                                            <option value="internship" ${job.employment_type === 'internship' ? 'selected' : ''}>Internship تدريب</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="edit-job-skills" class="form-label">Required Skills المهارات المطلوبة *</label>
+                                        <input type="text" id="edit-job-skills" name="skills_required" class="form-input" value="${job.skills_required || ''}" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-job-status" class="form-label">Status الحالة</label>
+                                    <select id="edit-job-status" name="status" class="form-select">
+                                        <option value="active" ${job.status === 'active' ? 'selected' : ''}>Active نشط</option>
+                                        <option value="closed" ${job.status === 'closed' ? 'selected' : ''}>Closed مغلق</option>
+                                        <option value="paused" ${job.status === 'paused' ? 'selected' : ''}>Paused متوقف</option>
+                                    </select>
+                                </div>
+                                <div id="edit-job-alert"></div>
+                                <div style="display: flex; gap: var(--spacing-sm); margin-top: var(--spacing-lg);">
+                                    <button type="submit" class="btn btn-primary">Save Changes حفظ التغييرات</button>
+                                    <button type="button" class="btn btn-outline" onclick="this.closest('div[style*=\"position: fixed\"]').remove()">Cancel إلغاء</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+
+                // Handle form submission
+                document.getElementById('edit-job-form').addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const alertContainer = document.getElementById('edit-job-alert');
+                    alertContainer.innerHTML = '';
+
+                    const formData = new FormData(e.target);
+                    const data = Object.fromEntries(formData.entries());
+
+                    try {
+                        const jobData = {
+                            title: data.title,
+                            description: data.description,
+                            location: data.location,
+                            skills_required: data.skills_required,
+                            employment_type: data.employment_type || 'full-time',
+                            status: data.status || 'active',
+                            salary: data.salary ? parseFloat(data.salary) : null
+                        };
+
+                        await jobsAPI.update(jobId, jobData);
+                        showSuccess(alertContainer, 'Job updated successfully!');
+                        
+                        // Close modal and reload jobs
+                        setTimeout(() => {
+                            modal.remove();
+                            loadMyJobs();
+                        }, 1500);
+                    } catch (error) {
+                        showError(alertContainer, error.message || 'Failed to update job. Please try again.');
+                        console.error('Update job error:', error);
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading job:', error);
+                alert('Failed to load job details: ' + error.message);
+            }
+        }
+
+        // Delete job
+        window.deleteJob = async function(jobId) {
+            if (!confirm('Are you sure you want to delete this job? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                await jobsAPI.delete(jobId);
+                alert('Job deleted successfully!');
+                loadMyJobs();
+            } catch (error) {
+                console.error('Error deleting job:', error);
+                alert('Failed to delete job: ' + error.message);
+            }
+        }
+
+        // Update application status
+        window.updateApplicationStatus = async function(applicationId, status) {
+            try {
+                console.log('[COMPANY] Updating application status:', applicationId, status);
+                await applicationsAPI.updateStatus(applicationId, status);
+                console.log('[COMPANY] Application status updated successfully');
+                
+                const statusText = status === 'accepted' ? 'accepted قبول' : status === 'rejected' ? 'rejected رفض' : status;
+                const container = document.getElementById('applications-container');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="alert alert-success">
+                            <strong>Success:</strong> Application ${statusText} successfully!<br>
+                            <strong>نجاح:</strong> تم ${status === 'accepted' ? 'قبول' : status === 'rejected' ? 'رفض' : 'تحديث'} الطلب بنجاح!
+                        </div>
+                    `;
+                }
+                
+                // Reload applications for the current job if available
+                if (currentJobIdForApplications) {
+                    setTimeout(() => {
+                        viewJobApplications(currentJobIdForApplications);
+                    }, 1000);
+                } else {
+                    // If no current job ID, reload the applications tab
+                    loadApplications();
+                }
+            } catch (error) {
+                console.error('[COMPANY] Error updating application status:', error);
+                const errorMessage = error && error.message ? error.message : (error && error.toString ? error.toString() : 'Unknown error');
+                alert('Failed to update application status: ' + errorMessage + '\nفشل تحديث حالة الطلب: ' + errorMessage);
+            }
+        }
+
+        // View applicant profile
+        window.viewApplicantProfile = async function(graduateId) {
+            try {
+                console.log('[COMPANY] Loading graduate profile:', graduateId);
+                const graduate = await graduatesAPI.getProfile(graduateId);
+                console.log('[COMPANY] Graduate profile received:', graduate);
+                
+                // Escape HTML helper
+                const escapeHTML = (text) => {
+                    if (!text) return '';
+                    const div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
+                };
+                
+                // Create modal to display profile
+                const modal = document.createElement('div');
+                modal.id = 'applicant-profile-modal';
+                modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: var(--spacing-lg);';
+                
+                // Close function
+                const closeModal = () => {
+                    const modalElement = document.getElementById('applicant-profile-modal');
+                    if (modalElement) {
+                        modalElement.remove();
+                    }
+                };
+                
+                // Close on background click
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeModal();
+                    }
+                });
+                
+                modal.innerHTML = `
+                    <div class="card" style="max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative;">
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 class="card-title">Graduate Profile الملف الشخصي</h3>
+                            <button id="close-profile-modal" style="background: none; border: none; font-size: 28px; cursor: pointer; color: var(--color-text-primary); padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-full); transition: all var(--transition-fast);" onmouseover="this.style.background='var(--color-bg-tertiary)'" onmouseout="this.style.background='none'">&times;</button>
+                        </div>
+                        <div class="card-body">
+                            ${graduate.profile_picture ? `
+                                <div style="text-align: center; margin-bottom: var(--spacing-lg);">
+                                    <img src="${escapeHTML(graduate.profile_picture)}" alt="Profile Picture" style="max-width: 200px; max-height: 200px; border-radius: var(--radius-full); object-fit: cover; border: 3px solid var(--color-primary);">
+                                </div>
+                            ` : ''}
+                            <h4>${escapeHTML(graduate.full_name || 'Graduate')}</h4>
+                            <p><strong>Email:</strong> ${escapeHTML(graduate.email || 'N/A')}</p>
+                            <p><strong>Major:</strong> ${escapeHTML(graduate.major || 'N/A')}</p>
+                            <p><strong>University:</strong> ${escapeHTML(graduate.university || 'N/A')}</p>
+                            ${graduate.GPA ? `<p><strong>GPA:</strong> ${graduate.GPA.toFixed(2)}</p>` : ''}
+                            ${graduate.date_of_birth ? `<p><strong>Date of Birth:</strong> ${escapeHTML(graduate.date_of_birth)}</p>` : ''}
+                            ${graduate.age ? `<p><strong>Age:</strong> ${graduate.age}</p>` : ''}
+                            ${graduate.gender ? `<p><strong>Gender:</strong> ${escapeHTML(graduate.gender)}</p>` : ''}
+                            ${graduate.skills ? `
+                                <div style="margin-top: var(--spacing-md);">
+                                    <strong>Skills:</strong>
+                                    <div style="display: flex; flex-wrap: wrap; gap: var(--spacing-xs); margin-top: var(--spacing-xs);">
+                                        ${parseSkills(graduate.skills).map(skill => `<span class="skill-tag">${escapeHTML(skill)}</span>`).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                            ${graduate.experience ? `
+                                <div style="margin-top: var(--spacing-md);">
+                                    <strong>Experience:</strong>
+                                    <p>${escapeHTML(graduate.experience)}</p>
+                                </div>
+                            ` : ''}
+                            ${graduate.projects ? `
+                                <div style="margin-top: var(--spacing-md);">
+                                    <strong>Projects:</strong>
+                                    <p>${escapeHTML(graduate.projects)}</p>
+                                </div>
+                            ` : ''}
+                            <div style="margin-top: var(--spacing-lg);">
+                                <button class="btn btn-outline" id="close-profile-btn">Close إغلاق</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                // Add event listeners for close buttons
+                const closeBtn = document.getElementById('close-profile-modal');
+                const closeBtnBottom = document.getElementById('close-profile-btn');
+                
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', closeModal);
+                }
+                if (closeBtnBottom) {
+                    closeBtnBottom.addEventListener('click', closeModal);
+                }
+                
+                // Close on Escape key
+                const handleEscape = (e) => {
+                    if (e.key === 'Escape') {
+                        closeModal();
+                        document.removeEventListener('keydown', handleEscape);
+                    }
+                };
+                document.addEventListener('keydown', handleEscape);
+                
+            } catch (error) {
+                console.error('[COMPANY] Error loading graduate profile:', error);
+                const errorMessage = error && error.message ? error.message : (error && error.toString ? error.toString() : 'Unknown error');
+                alert('Failed to load graduate profile: ' + errorMessage + '\nفشل تحميل الملف الشخصي: ' + errorMessage);
+            }
+        }
+
+        // Search graduates
+        async function searchGraduates() {
+            try {
+                const filters = {
+                    major: document.getElementById('search-major').value,
+                    skills: document.getElementById('search-skills').value,
+                    min_gpa: document.getElementById('search-min-gpa').value,
+                    university: document.getElementById('search-university').value
+                };
+
+                // Remove empty filters
+                Object.keys(filters).forEach(key => {
+                    if (!filters[key]) delete filters[key];
+                });
+
+                const response = await graduatesAPI.search(filters);
+                const container = document.getElementById('graduates-results');
+
+                if (!response.graduates || response.graduates.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <p>No graduates found matching your criteria.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = response.graduates.map(graduate => `
+                    <div class="card" style="margin-bottom: var(--spacing-lg);">
+                        <h3>${graduate.full_name || 'Graduate'}</h3>
+                        <p><strong>Major:</strong> ${graduate.major || 'N/A'}</p>
+                        <p><strong>University:</strong> ${graduate.university || 'N/A'}</p>
+                        ${graduate.GPA ? `<p><strong>GPA:</strong> ${graduate.GPA.toFixed(2)}</p>` : ''}
+                        ${graduate.skills ? `
+                            <div style="margin-top: var(--spacing-sm);">
+                                <strong>Skills:</strong>
+                                <div style="display: flex; flex-wrap: wrap; gap: var(--spacing-xs); margin-top: var(--spacing-xs);">
+                                    ${parseSkills(graduate.skills).map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        <div style="margin-top: var(--spacing-md);">
+                            <button class="btn btn-primary btn-sm" onclick="viewApplicantProfile(${graduate.graduate_id})">View Full Profile</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error searching graduates:', error);
+                document.getElementById('graduates-results').innerHTML = `
+                    <div class="alert alert-error">
+                        <strong>Error:</strong> Failed to search graduates.
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initDarkMode();
+            loadCompanyProfile().then(() => {
+                loadDashboard();
+            });
+        });
+    </script>
+</body>
+</html>

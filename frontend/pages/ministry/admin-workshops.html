@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Workshops</title>
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/ministry.css">
+</head>
+<body>
+  <div class="ministry-shell">
+    <aside class="sidebar">
+      <a class="logo" href="../ministry-portal.html">Ministry Portal</a>
+      <div class="section-title">Admin</div>
+      <nav class="nav">
+        <a href="./admin-registrations.html">Applications</a>
+        <a href="./admin-workshops.html" class="active">Workshops</a>
+        <a href="./admin-announcements.html">Announcements</a>
+        <a href="./reports.html">Reports & Analytics</a>
+        <a href="./admin-messages.html">Messages</a>
+      </nav>
+      <div class="section-title">Public</div>
+      <nav class="nav">
+        <a href="./registrations.html">Student Registration</a>
+        <a href="./workshops.html">Workshops</a>
+        <a href="./announcements.html">Announcements</a>
+        <a href="./services.html">Citizen Services</a>
+        <a href="./contact.html">Contact & Support</a>
+      </nav>
+      <div class="footer">© 2025 Ministry of Employment</div>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div class="title">Admin · Workshops Management</div>
+        <div class="actions">
+          <button id="dark-mode-toggle" class="btn btn-outline btn-sm" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+            <span id="dark-mode-icon">🌙</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="page-header">
+          <div>
+            <h1>Manage Workshops</h1>
+            <p>Create, update, or deactivate workshops.</p>
+          </div>
+        </div>
+
+        <div class="card-split">
+          <div class="card">
+            <h3>Create / Update Workshop</h3>
+            <form id="workshop-form" class="list">
+              <input type="hidden" id="workshop_id">
+              <div class="form-group">
+                <label class="form-label" for="title">Title *</label>
+                <input class="form-input" id="title" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="category">Category *</label>
+                <input class="form-input" id="category" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="date">Date *</label>
+                <input class="form-input" id="date" type="date" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="trainer">Trainer *</label>
+                <input class="form-input" id="trainer" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="capacity">Capacity</label>
+                <input class="form-input" id="capacity" type="number" min="1" placeholder="Optional">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="status">Status</label>
+                <select class="form-select" id="status">
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary btn-full">Save Workshop</button>
+              <div id="form-alert"></div>
+            </form>
+          </div>
+
+          <div class="card">
+            <h3>Existing Workshops</h3>
+            <div id="workshop-table"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/ministry-data.js"></script>
+  <script>
+    const form = document.getElementById('workshop-form');
+    const table = document.getElementById('workshop-table');
+    const alertBox = document.getElementById('form-alert');
+
+    function resetForm() {
+      form.reset();
+      document.getElementById('workshop_id').value = '';
+      alertBox.innerHTML = '';
+    }
+
+    function renderTable() {
+      const workshops = window.MinistryData.loadCollection(window.MinistryData.STORAGE_KEYS.workshops);
+      table.innerHTML = `
+        <table class="table">
+          <thead>
+            <tr><th>Title</th><th>Date</th><th>Status</th><th>Capacity</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            ${workshops.map(w => `
+              <tr>
+                <td>${w.title}</td>
+                <td>${w.date}</td>
+                <td><span class="badge ${w.status === 'active' ? 'success' : 'warning'}">${w.status}</span></td>
+                <td>${w.capacity || '—'}</td>
+                <td>
+                  <div style="display:flex; gap: var(--spacing-xs);">
+                    <button class="btn btn-outline btn-sm" onclick="editWorkshop(${w.id})">Edit</button>
+                    <button class="btn btn-outline btn-sm" onclick="toggleStatus(${w.id})">${w.status === 'active' ? 'Deactivate' : 'Activate'}</button>
+                  </div>
+                </td>
+              </tr>
+            `).join('') || '<tr><td colspan="5">No workshops found.</td></tr>'}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function editWorkshop(id) {
+      const workshops = window.MinistryData.loadCollection(window.MinistryData.STORAGE_KEYS.workshops);
+      const w = workshops.find(x => x.id === id);
+      if (!w) return;
+      document.getElementById('workshop_id').value = w.id;
+      form.title.value = w.title;
+      form.category.value = w.category;
+      form.date.value = w.date;
+      form.trainer.value = w.trainer;
+      form.capacity.value = w.capacity || '';
+      form.status.value = w.status;
+    }
+
+    function toggleStatus(id) {
+      const workshops = window.MinistryData.loadCollection(window.MinistryData.STORAGE_KEYS.workshops);
+      const w = workshops.find(x => x.id === id);
+      if (!w) return;
+      window.MinistryData.updateWorkshop(id, { status: w.status === 'active' ? 'inactive' : 'active' });
+      renderTable();
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      alertBox.innerHTML = '';
+      const payload = {
+        title: form.title.value.trim(),
+        category: form.category.value.trim(),
+        date: form.date.value,
+        trainer: form.trainer.value.trim(),
+        capacity: form.capacity.value ? parseInt(form.capacity.value, 10) : undefined,
+        status: form.status.value
+      };
+      const id = document.getElementById('workshop_id').value;
+      if (id) {
+        window.MinistryData.updateWorkshop(parseInt(id, 10), payload);
+        showSuccess(alertBox, 'Workshop updated.');
+      } else {
+        window.MinistryData.addWorkshop(payload);
+        showSuccess(alertBox, 'Workshop created.');
+      }
+      resetForm();
+      renderTable();
+    });
+
+    document.addEventListener('DOMContentLoaded', renderTable);
+  </script>
+</body>
+</html>
+

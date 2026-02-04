@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Announcements</title>
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/ministry.css">
+</head>
+<body>
+  <div class="ministry-shell">
+    <aside class="sidebar">
+      <a class="logo" href="../ministry-portal.html">Ministry Portal</a>
+      <div class="section-title">Admin</div>
+      <nav class="nav">
+        <a href="./admin-registrations.html">Applications</a>
+        <a href="./admin-workshops.html">Workshops</a>
+        <a href="./admin-announcements.html" class="active">Announcements</a>
+        <a href="./reports.html">Reports & Analytics</a>
+        <a href="./admin-messages.html">Messages</a>
+      </nav>
+      <div class="section-title">Public</div>
+      <nav class="nav">
+        <a href="./registrations.html">Student Registration</a>
+        <a href="./workshops.html">Workshops</a>
+        <a href="./announcements.html">Announcements</a>
+        <a href="./services.html">Citizen Services</a>
+        <a href="./contact.html">Contact & Support</a>
+      </nav>
+      <div class="footer">© 2025 Ministry of Employment</div>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div class="title">Admin · Announcements</div>
+        <div class="actions">
+          <button id="dark-mode-toggle" class="btn btn-outline btn-sm" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+            <span id="dark-mode-icon">🌙</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="page-header">
+          <div>
+            <h1>Create / Edit Announcement</h1>
+            <p>Publish official ministry updates with attachments.</p>
+          </div>
+        </div>
+
+        <div class="card-split">
+          <div class="card">
+            <form id="ann-form" class="list">
+              <input type="hidden" id="ann_id">
+              <div class="form-group">
+                <label class="form-label" for="title">Title *</label>
+                <input class="form-input" id="title" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="description">Description *</label>
+                <textarea class="form-textarea" id="description" rows="4" required></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="date">Date *</label>
+                <input class="form-input" id="date" type="date" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="attachments">Attachments (comma separated)</label>
+                <input class="form-input" id="attachments" placeholder="file1.pdf, file2.docx">
+              </div>
+              <button type="submit" class="btn btn-primary btn-full">Save Announcement</button>
+              <div id="form-alert"></div>
+            </form>
+          </div>
+
+          <div class="card">
+            <h3>Existing Announcements</h3>
+            <div id="ann-table"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/ministry-data.js"></script>
+  <script>
+    const form = document.getElementById('ann-form');
+    const table = document.getElementById('ann-table');
+    const alertBox = document.getElementById('form-alert');
+
+    function resetForm() {
+      form.reset();
+      document.getElementById('ann_id').value = '';
+      alertBox.innerHTML = '';
+    }
+
+    function renderTable() {
+      const anns = window.MinistryData.loadCollection(window.MinistryData.STORAGE_KEYS.announcements);
+      table.innerHTML = `
+        <table class="table">
+          <thead><tr><th>Title</th><th>Date</th><th>Attachments</th><th>Actions</th></tr></thead>
+          <tbody>
+            ${anns.map(a => `
+              <tr>
+                <td>${a.title}</td>
+                <td>${a.date}</td>
+                <td>${a.attachments?.length ? a.attachments.join(', ') : '—'}</td>
+                <td>
+                  <div style="display:flex; gap: var(--spacing-xs);">
+                    <button class="btn btn-outline btn-sm" onclick="editAnn(${a.id})">Edit</button>
+                  </div>
+                </td>
+              </tr>
+            `).join('') || '<tr><td colspan="4">No announcements found.</td></tr>'}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function editAnn(id) {
+      const anns = window.MinistryData.loadCollection(window.MinistryData.STORAGE_KEYS.announcements);
+      const a = anns.find(x => x.id === id);
+      if (!a) return;
+      document.getElementById('ann_id').value = a.id;
+      form.title.value = a.title;
+      form.description.value = a.description;
+      form.date.value = a.date;
+      form.attachments.value = a.attachments?.join(', ') || '';
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      alertBox.innerHTML = '';
+      const payload = {
+        title: form.title.value.trim(),
+        description: form.description.value.trim(),
+        date: form.date.value,
+        attachments: form.attachments.value ? form.attachments.value.split(',').map(x => x.trim()).filter(Boolean) : []
+      };
+      const id = document.getElementById('ann_id').value;
+      if (id) {
+        window.MinistryData.updateAnnouncement(parseInt(id, 10), payload);
+        showSuccess(alertBox, 'Announcement updated.');
+      } else {
+        window.MinistryData.addAnnouncement(payload);
+        showSuccess(alertBox, 'Announcement created.');
+      }
+      resetForm();
+      renderTable();
+    });
+
+    document.addEventListener('DOMContentLoaded', renderTable);
+  </script>
+</body>
+</html>
+

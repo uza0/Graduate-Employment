@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reports & Analytics - Ministry Portal</title>
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/ministry.css">
+</head>
+<body>
+  <div class="ministry-shell">
+    <aside class="sidebar">
+      <a class="logo" href="../ministry-portal.html">Ministry Portal</a>
+      <div class="section-title">Admin</div>
+      <nav class="nav">
+        <a href="./admin-registrations.html">Applications</a>
+        <a href="./admin-workshops.html">Workshops</a>
+        <a href="./admin-announcements.html">Announcements</a>
+        <a href="./reports.html" class="active">Reports & Analytics</a>
+        <a href="./admin-messages.html">Messages</a>
+      </nav>
+      <div class="section-title">Public</div>
+      <nav class="nav">
+        <a href="./registrations.html">Student Registration</a>
+        <a href="./workshops.html">Workshops</a>
+        <a href="./announcements.html">Announcements</a>
+        <a href="./services.html">Citizen Services</a>
+        <a href="./contact.html">Contact & Support</a>
+      </nav>
+      <div class="footer">© 2025 Ministry of Employment</div>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div class="title">Reports & Analytics</div>
+        <div class="actions">
+          <button id="dark-mode-toggle" class="btn btn-outline btn-sm" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+            <span id="dark-mode-icon">🌙</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="page-header">
+          <div>
+            <h1>Dashboard</h1>
+            <p>Summary of student registrations, workshops, and approvals.</p>
+          </div>
+        </div>
+
+        <div class="summary-grid" id="summary-cards"></div>
+
+        <div class="card-split" style="margin-top: var(--spacing-lg);">
+          <div class="card">
+            <h3>Registrations Over Time</h3>
+            <div class="chart-placeholder">Chart Placeholder (connect to real data)</div>
+          </div>
+          <div class="card">
+            <h3>Workshop Enrollment</h3>
+            <div class="chart-placeholder">Chart Placeholder (connect to real data)</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: var(--spacing-lg);">
+          <h3>Recent Applications</h3>
+          <div id="recent-table"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/ministry-data.js"></script>
+  <script>
+    const summaryEl = document.getElementById('summary-cards');
+    const recentTable = document.getElementById('recent-table');
+
+    function renderSummary() {
+      const registrations = window.MinistryData.loadCollection(window.MinistryData.STORAGE_KEYS.registrations);
+      const workshops = window.MinistryData.loadCollection(window.MinistryData.STORAGE_KEYS.workshops);
+      const announcements = window.MinistryData.loadCollection(window.MinistryData.STORAGE_KEYS.announcements);
+
+      const approved = registrations.filter(r => r.status === 'approved').length;
+      const pending = registrations.filter(r => r.status === 'pending').length;
+      const workshopCapacity = workshops.reduce((sum, w) => sum + (w.capacity || 0), 0);
+      const workshopRegistered = workshops.reduce((sum, w) => sum + (w.registered || 0), 0);
+
+      summaryEl.innerHTML = `
+        <div class="summary-card">
+          <h3>Total Applications</h3>
+          <div class="value">${registrations.length}</div>
+          <p style="color: var(--color-text-secondary);">Pending: ${pending} • Approved: ${approved}</p>
+        </div>
+        <div class="summary-card">
+          <h3>Workshops</h3>
+          <div class="value">${workshops.length}</div>
+          <p style="color: var(--color-text-secondary);">Enrolled ${workshopRegistered}/${workshopCapacity || '—'}</p>
+        </div>
+        <div class="summary-card">
+          <h3>Announcements</h3>
+          <div class="value">${announcements.length}</div>
+          <p style="color: var(--color-text-secondary);">Published items</p>
+        </div>
+      `;
+    }
+
+    function renderRecent() {
+      const registrations = window.MinistryData.loadCollection(window.MinistryData.STORAGE_KEYS.registrations)
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .slice(0, 10);
+
+      recentTable.innerHTML = `
+        <table class="table">
+          <thead><tr><th>Name</th><th>University</th><th>GPA</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody>
+            ${registrations.map(r => `
+              <tr>
+                <td>${r.full_name}</td>
+                <td>${r.university}</td>
+                <td>${r.gpa}</td>
+                <td><span class="badge ${r.status === 'approved' ? 'success' : r.status === 'rejected' ? 'error' : 'warning'}">${r.status}</span></td>
+                <td>${new Date(r.created_at).toLocaleDateString()}</td>
+              </tr>
+            `).join('') || '<tr><td colspan="5">No data.</td></tr>'}
+          </tbody>
+        </table>
+      `;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderSummary();
+      renderRecent();
+    });
+  </script>
+</body>
+</html>
+

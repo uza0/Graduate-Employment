@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Announcements - Ministry Portal</title>
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/ministry.css">
+</head>
+<body>
+  <div class="ministry-shell">
+    <aside class="sidebar">
+      <a class="logo" href="../ministry-portal.html">Ministry Portal</a>
+      <div class="section-title">Public</div>
+      <nav class="nav">
+        <a href="./registrations.html">Student Registration</a>
+        <a href="./workshops.html">Workshops</a>
+        <a href="./announcements.html" class="active">Announcements</a>
+        <a href="./services.html">Citizen Services</a>
+        <a href="./contact.html">Contact & Support</a>
+      </nav>
+      <div class="section-title">Admin</div>
+      <nav class="nav">
+        <a href="./admin-registrations.html">Applications (Admin)</a>
+        <a href="./admin-workshops.html">Workshops (Admin)</a>
+        <a href="./admin-announcements.html">Announcements (Admin)</a>
+        <a href="./reports.html">Reports & Analytics</a>
+        <a href="./admin-messages.html">Messages (Admin)</a>
+      </nav>
+      <div class="footer">© 2025 Ministry of Employment</div>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div class="title">Official Announcements</div>
+        <div class="actions">
+          <button id="dark-mode-toggle" class="btn btn-outline btn-sm" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+            <span id="dark-mode-icon">🌙</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="page-header">
+          <div>
+            <h1>Ministry Announcements</h1>
+            <p>Stay informed with the latest official news.</p>
+          </div>
+          <input id="search" class="form-input" placeholder="Search announcements">
+        </div>
+
+        <div id="announcement-list" class="list"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/ministry-data.js"></script>
+  <script>
+    const searchEl = document.getElementById('search');
+    const listEl = document.getElementById('announcement-list');
+
+    function render() {
+      const anns = window.MinistryData.loadCollection(window.MinistryData.STORAGE_KEYS.announcements);
+      const term = searchEl.value.toLowerCase();
+      const filtered = anns.filter(a =>
+        a.title.toLowerCase().includes(term) ||
+        a.description.toLowerCase().includes(term)
+      );
+
+      listEl.innerHTML = filtered.map(a => `
+        <div class="list-item">
+          <div class="meta">${a.date}</div>
+          <h3>${a.title}</h3>
+          <p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">${a.description}</p>
+          ${a.attachments?.length ? `<div class="meta">Attachments: ${a.attachments.join(', ')}</div>` : ''}
+        </div>
+      `).join('') || '<div class="empty-state">No announcements found.</div>';
+    }
+
+    searchEl.addEventListener('input', render);
+    document.addEventListener('DOMContentLoaded', render);
+  </script>
+</body>
+</html>
+

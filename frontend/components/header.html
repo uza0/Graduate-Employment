@@ -1,0 +1,77 @@
+<!-- JoinWork - Header Component -->
+<!-- Include this in pages using: <div id="header-placeholder"></div> -->
+
+<header class="header">
+  <div class="header-container">
+    <a href="/frontend/pages/dashboard.html" class="header-logo">JoinWork</a>
+    <nav class="header-nav">
+      <a href="/frontend/pages/jobs.html">Jobs الوظائف</a>
+      <a href="/frontend/pages/workshops.html">Workshops ورش العمل</a>
+      <a href="/frontend/pages/profile.html">Profile الملف الشخصي</a>
+    </nav>
+    <div class="header-user">
+      <button id="dark-mode-toggle" class="btn btn-outline btn-sm" onclick="toggleDarkMode()" title="Toggle Dark Mode تبديل الوضع الداكن">
+        <span id="dark-mode-icon">🌙</span>
+      </button>
+      <span id="user-name"></span>
+      <button class="btn btn-outline btn-sm" onclick="authAPI.logout()">Logout تسجيل الخروج</button>
+    </div>
+  </div>
+</header>
+
+<script>
+// Load header into placeholder
+document.addEventListener('DOMContentLoaded', function() {
+  const placeholder = document.getElementById('header-placeholder');
+  if (placeholder) {
+    fetch('/frontend/components/header.html')
+      .then(response => response.text())
+      .then(html => {
+        placeholder.innerHTML = html;
+        // Update user name if available
+        const userData = localStorage.getItem('userData');
+        if (userData) {
+          try {
+            const user = JSON.parse(userData);
+            const userNameEl = document.getElementById('user-name');
+            if (userNameEl) {
+              userNameEl.textContent = user.full_name || user.email;
+            }
+          } catch (e) {
+            console.error('Error parsing user data:', e);
+          }
+        }
+        // Initialize dark mode toggle icon
+        updateDarkModeIcon();
+      })
+      .catch(error => {
+        console.error('Error loading header:', error);
+        // Fallback: create header directly
+        placeholder.innerHTML = `
+          <header class="header">
+            <div class="header-container">
+              <a href="/frontend/pages/dashboard.html" class="header-logo">JoinWork</a>
+              <nav class="header-nav">
+                <a href="/frontend/pages/jobs.html">Jobs الوظائف</a>
+                <a href="/frontend/pages/workshops.html">Workshops ورش العمل</a>
+                <a href="/frontend/pages/profile.html">Profile الملف الشخصي</a>
+              </nav>
+              <div class="header-user">
+                <button id="dark-mode-toggle" class="btn btn-outline btn-sm" onclick="toggleDarkMode()" title="Toggle Dark Mode تبديل الوضع الداكن">
+                  <span id="dark-mode-icon">🌙</span>
+                </button>
+                <button class="btn btn-outline btn-sm" onclick="window.location.href='/frontend/pages/login.html'">Logout تسجيل الخروج</button>
+              </div>
+            </div>
+          </header>
+        `;
+        // Initialize dark mode toggle icon
+        updateDarkModeIcon();
+      });
+  }
+  
+  // Initialize dark mode on page load
+  initDarkMode();
+});
+</script>
+

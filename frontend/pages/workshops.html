@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workshops - JoinWork</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <style>
+        .workshops-header {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            color: var(--color-text-inverse);
+            padding: var(--spacing-2xl) 0;
+            margin-bottom: var(--spacing-2xl);
+            transition: background var(--transition-base);
+        }
+        .workshop-card {
+            margin-bottom: var(--spacing-lg);
+            transition: transform var(--transition-base);
+        }
+        .workshop-card:hover {
+            transform: translateY(-4px);
+        }
+        .workshop-category {
+            display: inline-block;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            background: var(--color-secondary);
+            color: var(--color-text-primary);
+            border-radius: var(--radius-sm);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+            margin-bottom: var(--spacing-sm);
+        }
+        .workshop-date {
+            color: var(--color-primary);
+            font-weight: var(--font-weight-medium);
+            margin: var(--spacing-sm) 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Dark Mode Toggle Button -->
+    <button id="dark-mode-toggle" class="btn btn-outline btn-sm" onclick="toggleDarkMode()" title="Toggle Dark Mode تبديل الوضع الداكن" style="position: fixed; top: 20px; right: 20px; z-index: 1000; background: var(--color-surface); border: 2px solid var(--color-primary);">
+        <span id="dark-mode-icon">🌙</span>
+    </button>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <a href="dashboard.html" class="header-logo">JoinWork</a>
+            <nav class="header-nav">
+                <a href="jobs.html">Jobs الوظائف</a>
+                <a href="workshops.html">Workshops ورش العمل</a>
+                <a href="profile.html">Profile الملف الشخصي</a>
+            </nav>
+            <div class="header-user">
+                <span id="user-name"></span>
+                <button class="btn btn-outline btn-sm" onclick="authAPI.logout()">Logout تسجيل الخروج</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Workshops Header -->
+    <div class="workshops-header">
+        <div class="container">
+            <h1>Training Workshops ورش العمل التدريبية</h1>
+            <p>Enhance your skills with professional training<br>طور مهاراتك بالتدريب الاحترافي</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container page-container">
+        <!-- Filters -->
+        <div class="filters-section" style="background: var(--color-surface); padding: var(--spacing-lg); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); margin-bottom: var(--spacing-xl);">
+            <div class="filters-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-md);">
+                <div class="form-group">
+                    <label for="filter-category" class="form-label">Category الفئة</label>
+                    <select id="filter-category" class="form-select" onchange="filterWorkshops()">
+                        <option value="">All Categories جميع الفئات</option>
+                        <option value="Technology">Technology التكنولوجيا</option>
+                        <option value="Business">Business الأعمال</option>
+                        <option value="Design">Design التصميم</option>
+                        <option value="Marketing">Marketing التسويق</option>
+                        <option value="Other">Other أخرى</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="search-workshops" class="form-label">Search بحث</label>
+                    <input 
+                        type="text" 
+                        id="search-workshops" 
+                        class="form-input" 
+                        placeholder="Search workshops... ابحث عن ورش العمل..."
+                        onkeyup="filterWorkshops()"
+                    >
+                </div>
+            </div>
+        </div>
+
+        <!-- Workshops List -->
+        <div id="workshops-container">
+            <div class="empty-state">
+                <p>Loading workshops... جاري تحميل ورش العمل...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>JoinWork</h4>
+                    <p>Connecting graduates with opportunities<br>ربط الخريجين بالفرص</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links الروابط السريعة</h4>
+                    <a href="jobs.html">Jobs الوظائف</a>
+                    <a href="workshops.html">Workshops ورش العمل</a>
+                    <a href="profile.html">Profile الملف الشخصي</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 JoinWork. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        let allWorkshops = [];
+        let filteredWorkshops = [];
+
+        // Check authentication
+        if (!isAuthenticated()) {
+            window.location.href = 'login.html';
+        }
+
+        // Load user data
+        const userData = getCurrentUser();
+        if (userData) {
+            document.getElementById('user-name').textContent = userData.full_name || userData.email;
+        }
+
+        // Load workshops
+        async function loadWorkshops() {
+            try {
+                const response = await workshopsAPI.getAll();
+                allWorkshops = response.workshops || [];
+                filteredWorkshops = [...allWorkshops];
+                displayWorkshops();
+            } catch (error) {
+                console.error('Error loading workshops:', error);
+                document.getElementById('workshops-container').innerHTML = `
+                    <div class="alert alert-error">
+                        <strong>Error: خطأ:</strong> Failed to load workshops. Please try again later.<br>فشل تحميل ورش العمل. يرجى المحاولة مرة أخرى لاحقاً.
+                    </div>
+                `;
+            }
+        }
+
+        // Filter workshops
+        function filterWorkshops() {
+            const categoryFilter = document.getElementById('filter-category').value.toLowerCase();
+            const searchTerm = document.getElementById('search-workshops').value.toLowerCase();
+
+            filteredWorkshops = allWorkshops.filter(workshop => {
+                const matchesCategory = !categoryFilter || 
+                    (workshop.category && workshop.category.toLowerCase() === categoryFilter);
+
+                const matchesSearch = !searchTerm || 
+                    (workshop.title && workshop.title.toLowerCase().includes(searchTerm)) ||
+                    (workshop.description && workshop.description.toLowerCase().includes(searchTerm)) ||
+                    (workshop.trainer && workshop.trainer.toLowerCase().includes(searchTerm));
+
+                return matchesCategory && matchesSearch;
+            });
+
+            displayWorkshops();
+        }
+
+        // Display workshops
+        function displayWorkshops() {
+            const container = document.getElementById('workshops-container');
+
+            if (filteredWorkshops.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>No workshops found matching your criteria.<br>لم يتم العثور على ورش عمل تطابق معاييرك.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filteredWorkshops.map(workshop => `
+                <div class="card workshop-card">
+                    ${workshop.category ? `<span class="workshop-category">${workshop.category}</span>` : ''}
+                    <h3 class="card-title">${workshop.title || 'Workshop'}</h3>
+                    ${workshop.date ? `<div class="workshop-date">📅 ${formatDateTime(workshop.date)}</div>` : ''}
+                    ${workshop.trainer ? `<p><strong>Trainer المدرب:</strong> ${workshop.trainer}</p>` : ''}
+                    ${workshop.duration ? `<p><strong>Duration المدة:</strong> ${workshop.duration} minutes دقائق</p>` : ''}
+                    ${workshop.max_participants ? `<p><strong>Max Participants الحد الأقصى للمشاركين:</strong> ${workshop.max_participants}</p>` : ''}
+                    ${workshop.description ? `
+                        <div class="card-body" style="margin-top: var(--spacing-md);">
+                            ${truncateText(workshop.description, 200)}
+                        </div>
+                    ` : ''}
+                    <div class="card-footer">
+                        <button class="btn btn-primary" onclick="registerForWorkshop(${workshop.workshop_id})">Join Workshop انضم للورشة</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Register for workshop
+        async function registerForWorkshop(workshopId) {
+            if (!confirm('Are you sure you want to register for this workshop?\nهل أنت متأكد من التسجيل في هذه الورشة؟')) {
+                return;
+            }
+
+            try {
+                await workshopsAPI.register(workshopId);
+                alert('Successfully registered for the workshop!\nتم التسجيل في الورشة بنجاح!');
+            } catch (error) {
+                alert('Failed to register: ' + (error.message || 'Unknown error') + '\nفشل التسجيل: ' + (error.message || 'خطأ غير معروف'));
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initDarkMode();
+            loadWorkshops();
+        });
+    </script>
+</body>
+</html>
+

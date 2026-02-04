@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Employment Registration - Ministry Portal</title>
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/ministry.css">
+</head>
+<body>
+  <div class="ministry-shell">
+    <aside class="sidebar">
+      <a class="logo" href="../ministry-portal.html">Ministry Portal</a>
+      <div>
+        <div class="section-title">Public</div>
+        <nav class="nav">
+          <a href="./registrations.html" class="active">Student Registration</a>
+          <a href="./workshops.html">Workshops</a>
+          <a href="./announcements.html">Announcements</a>
+          <a href="./services.html">Citizen Services</a>
+          <a href="./contact.html">Contact & Support</a>
+        </nav>
+      </div>
+      <div class="section-title">Admin</div>
+      <nav class="nav">
+        <a href="./admin-registrations.html">Applications (Admin)</a>
+        <a href="./admin-workshops.html">Workshops (Admin)</a>
+        <a href="./admin-announcements.html">Announcements (Admin)</a>
+        <a href="./reports.html">Reports & Analytics</a>
+        <a href="./admin-messages.html">Messages (Admin)</a>
+      </nav>
+      <div class="footer">© 2025 Ministry of Employment</div>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div class="title">Student Employment Registration</div>
+        <div class="actions">
+          <button id="dark-mode-toggle" class="btn btn-outline btn-sm" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+            <span id="dark-mode-icon">🌙</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="page-header">
+          <div>
+            <h1>Register for Employment Interviews</h1>
+            <p>Submit your details to be considered for upcoming interview rounds with partner companies.</p>
+          </div>
+          <div class="summary-card">
+            <h3>Need help?</h3>
+            <p style="margin-bottom: var(--spacing-sm); color: var(--color-text-secondary);">Contact the ministry support team for assistance with your application.</p>
+            <button class="btn btn-primary btn-sm" onclick="window.location.href='./contact.html'">Contact Support</button>
+          </div>
+        </div>
+
+        <div class="card-split">
+          <div class="card">
+            <h3>Application Form</h3>
+            <p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-md);">Fields marked * are required.</p>
+            <form id="registration-form" class="list" enctype="multipart/form-data">
+              <div class="form-group">
+                <label class="form-label" for="full_name">Full Name *</label>
+                <input class="form-input" id="full_name" name="full_name" required placeholder="Your full name">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="university">University *</label>
+                <input class="form-input" id="university" name="university" required placeholder="University name">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="major">Major *</label>
+                <input class="form-input" id="major" name="major" required placeholder="Your major">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="gpa">GPA *</label>
+                <input class="form-input" id="gpa" name="gpa" type="number" step="0.01" min="0" max="4" required placeholder="e.g., 3.5">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="email">Email *</label>
+                <input class="form-input" id="email" name="email" type="email" required placeholder="your@email.com">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="phone">Phone *</label>
+                <input class="form-input" id="phone" name="phone" required placeholder="+964 7xx xxx xxxx">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="cv">CV Upload (PDF) *</label>
+                <input class="file-input" id="cv" name="cv" type="file" accept=".pdf" required>
+              </div>
+              <button type="submit" class="btn btn-primary btn-full">Submit Application</button>
+              <div id="form-alert"></div>
+            </form>
+          </div>
+
+          <div class="card">
+            <h3>What happens next?</h3>
+            <ul class="list" style="list-style: disc; padding-left: 1.25rem; color: var(--color-text-secondary);">
+              <li>Your application is reviewed by ministry staff.</li>
+              <li>If approved, you’ll receive interview scheduling details by email/phone.</li>
+              <li>Bring your documents and printed CV to the interview.</li>
+            </ul>
+            <div class="summary-card" style="margin-top: var(--spacing-lg);">
+              <h3>Interview Preparation</h3>
+              <p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Review common interview questions and rehearse your answers.</p>
+              <button class="btn btn-outline btn-sm" onclick="alert('Tip: Prepare a 60-second self-introduction!')">Get a quick tip</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/ministry-data.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('registration-form');
+      const alertBox = document.getElementById('form-alert');
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        alertBox.innerHTML = '';
+
+        const data = {
+          full_name: form.full_name.value.trim(),
+          university: form.university.value.trim(),
+          major: form.major.value.trim(),
+          gpa: parseFloat(form.gpa.value),
+          email: form.email.value.trim().toLowerCase(),
+          phone: form.phone.value.trim(),
+          cv_name: form.cv.files[0] ? form.cv.files[0].name : 'uploaded-cv.pdf'
+        };
+
+        if (!isValidEmail(data.email)) {
+          showError(alertBox, 'Please enter a valid email.');
+          return;
+        }
+        if (isNaN(data.gpa) || data.gpa < 0 || data.gpa > 4) {
+          showError(alertBox, 'GPA must be between 0 and 4.');
+          return;
+        }
+
+        const record = addRegistration(data);
+        showSuccess(alertBox, 'Application submitted! Your reference ID: ' + record.id);
+        form.reset();
+      });
+    });
+  </script>
+</body>
+</html>
+

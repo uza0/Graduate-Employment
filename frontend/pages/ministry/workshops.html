@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workshops - Ministry Portal</title>
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/ministry.css">
+</head>
+<body>
+  <div class="ministry-shell">
+    <aside class="sidebar">
+      <a class="logo" href="../ministry-portal.html">Ministry Portal</a>
+      <div class="section-title">Public</div>
+      <nav class="nav">
+        <a href="./registrations.html">Student Registration</a>
+        <a href="./workshops.html" class="active">Workshops</a>
+        <a href="./announcements.html">Announcements</a>
+        <a href="./services.html">Citizen Services</a>
+        <a href="./contact.html">Contact & Support</a>
+      </nav>
+      <div class="section-title">Admin</div>
+      <nav class="nav">
+        <a href="./admin-registrations.html">Applications (Admin)</a>
+        <a href="./admin-workshops.html">Workshops (Admin)</a>
+        <a href="./admin-announcements.html">Announcements (Admin)</a>
+        <a href="./reports.html">Reports & Analytics</a>
+        <a href="./admin-messages.html">Messages (Admin)</a>
+      </nav>
+      <div class="footer">© 2025 Ministry of Employment</div>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div class="title">Upcoming Workshops</div>
+        <div class="actions">
+          <button id="dark-mode-toggle" class="btn btn-outline btn-sm" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+            <span id="dark-mode-icon">🌙</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="page-header">
+          <div>
+            <h1>Training & Workshops</h1>
+            <p>Enhance your skills with ministry-led training sessions.</p>
+          </div>
+          <div class="filter-bar">
+            <input id="search" class="form-input" placeholder="Search title or category">
+            <select id="status" class="form-select">
+              <option value="all">All</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="workshop-list" class="list"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/ministry-data.js"></script>
+  <script>
+    const listEl = document.getElementById('workshop-list');
+    const searchEl = document.getElementById('search');
+    const statusEl = document.getElementById('status');
+
+    function render() {
+      const workshops = window.MinistryData.loadCollection(window.MinistryData.STORAGE_KEYS.workshops);
+      const term = searchEl.value.toLowerCase();
+      const status = statusEl.value;
+
+      const filtered = workshops.filter(w =>
+        (status === 'all' ? true : w.status === status) &&
+        (w.title.toLowerCase().includes(term) || w.category.toLowerCase().includes(term))
+      );
+
+      listEl.innerHTML = filtered.map(w => `
+        <div class="list-item">
+          <div class="meta">${w.category} • ${w.date}</div>
+          <h3>${w.title}</h3>
+          <p class="meta">Trainer: ${w.trainer}</p>
+          <p class="meta">Capacity: ${w.registered || 0}/${w.capacity || '—'}</p>
+          <div style="display:flex; gap: var(--spacing-sm); flex-wrap: wrap; margin-top: var(--spacing-sm);">
+            <span class="badge ${w.status === 'active' ? 'success' : 'warning'}">${w.status}</span>
+            <button class="btn btn-primary btn-sm" onclick="register(${w.id})" ${w.status !== 'active' ? 'disabled' : ''}>Register</button>
+          </div>
+        </div>
+      `).join('') || '<div class="empty-state">No workshops found.</div>';
+    }
+
+    function register(id) {
+      const name = prompt('Enter your full name');
+      const email = prompt('Enter your email');
+      if (!name || !email || !isValidEmail(email)) {
+        alert('Please provide a valid name and email.');
+        return;
+      }
+      const updated = window.MinistryData.registerForWorkshop(id, { name, email });
+      if (updated) {
+        alert('Registered successfully!');
+        render();
+      } else {
+        alert('Registration failed. This workshop may be inactive.');
+      }
+    }
+
+    searchEl.addEventListener('input', render);
+    statusEl.addEventListener('change', render);
+    document.addEventListener('DOMContentLoaded', render);
+  </script>
+</body>
+</html>
+
