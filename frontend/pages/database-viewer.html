@@ -234,6 +234,9 @@
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+    <script src="../js/firebase-config.js"></script>
     <script src="../js/api.js"></script>
     <script>
         const viewModes = {
@@ -261,19 +264,16 @@
             });
 
             try {
-                const response = await fetch('http://localhost:3000/api/admin/database');
-                const result = await response.json();
-
+                const result = await getDatabaseSnapshot();
                 if (result.error) {
                     throw new Error(result.message || 'Failed to load database');
                 }
-
                 loading.style.display = 'none';
                 displayDatabase(result.data);
             } catch (err) {
                 loading.style.display = 'none';
                 error.style.display = 'block';
-                errorMessage.textContent = `Error: ${err.message}. Make sure the backend server is running on http://localhost:3000`;
+                errorMessage.textContent = 'Error: ' + (err.message || 'Failed to load. Check Firebase config and Firestore.');
             }
         }
 
